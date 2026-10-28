@@ -1,0 +1,10 @@
+# Optional: used only on Apache / cPanel hosting (e.g. Hostinger, Bluehost).
+ErrorDocument 404 /404.html
+AddType image/webp .webp
+AddType application/manifest+json .webmanifest
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/webp "access plus 7 days"
+  ExpiresByType text/css "access plus 1 day"
+  ExpiresByType application/javascript "access plus 1 day"
+</IfModule>
