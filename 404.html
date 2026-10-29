@@ -8,6 +8,9 @@
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="assets/css/styles.css">
+<script>/* apply the admin's saved "Look & feel" before first paint (set by main.js) */
+(function(){try{var t=JSON.parse(localStorage.getItem("sfc-theme")||"null");if(!t)return;var r=document.documentElement;for(var k in t.vars)r.style.setProperty(k,t.vars[k]);if(t.shape==="original")r.setAttribute("data-logo","original");if(t.font){var l=document.createElement("link");l.rel="stylesheet";l.href=t.font;l.setAttribute("data-theme-font","");document.head.appendChild(l);}if(t.logo)document.addEventListener("DOMContentLoaded",function(){[].forEach.call(document.querySelectorAll(".brand img,.fbrand img"),function(i){i.src=t.logo;});});}catch(e){}})();
+</script>
 <style>
 .page-top{background:var(--stage); color:var(--stage-ink); padding-block:calc(28px + env(safe-area-inset-top,0px)) 28px}
 .page-top .wrap{display:flex; justify-content:space-between; align-items:center; gap:16px}

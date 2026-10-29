@@ -40,12 +40,76 @@ function nextService(svc){
   const dt=new Date(base); dt.setUTCDate(base.getUTCDate()+add); return {date:dt, today:add===0};
 }
 
+/* ---------- look & feel (logo, fonts, colors) — edited in /admin → "Look & feel" ---------- */
+const COLOR_THEMES={ // 50 … 950 (Tailwind-style scales: tested for readable contrast)
+  orange:["#FFF7ED","#FFEDD5","#FED7AA","#FDBA74","#FB923C","#F97316","#EA580C","#C2410C","#9A3412","#7C2D12","#431407"],
+  gold:  ["#FFFBEB","#FEF3C7","#FDE68A","#FCD34D","#FBBF24","#F59E0B","#D97706","#B45309","#92400E","#78350F","#451A03"],
+  red:   ["#FEF2F2","#FEE2E2","#FECACA","#FCA5A5","#F87171","#EF4444","#DC2626","#B91C1C","#991B1B","#7F1D1D","#450A0A"],
+  violet:["#F5F3FF","#EDE9FE","#DDD6FE","#C4B5FD","#A78BFA","#8B5CF6","#7C3AED","#6D28D9","#5B21B6","#4C1D95","#2E1065"],
+  blue:  ["#EFF6FF","#DBEAFE","#BFDBFE","#93C5FD","#60A5FA","#3B82F6","#2563EB","#1D4ED8","#1E40AF","#1E3A8A","#172554"],
+  teal:  ["#F0FDFA","#CCFBF1","#99F6E4","#5EEAD4","#2DD4BF","#14B8A6","#0D9488","#0F766E","#115E59","#134E4A","#042F2E"],
+  green: ["#ECFDF5","#D1FAE5","#A7F3D0","#6EE7B7","#34D399","#10B981","#059669","#047857","#065F46","#064E3B","#022C22"]
+};
+const STEPS=[50,100,200,300,400,500,600,700,800,900,950];
+const G="https://fonts.googleapis.com/css2?display=swap&";
+const FONT_THEMES={ // display (headings) · body · accent (italic words & verses)
+  "avant-cooper":{d:'"SFC Avant","Century Gothic",system-ui,sans-serif', b:'"SFC Avant","Century Gothic",system-ui,sans-serif', a:'"SFC Cooper",Georgia,serif', href:""},
+  "modern":  {d:'"Montserrat",system-ui,sans-serif', b:'"Open Sans",system-ui,sans-serif', a:'"Playfair Display",Georgia,serif',
+              href:G+"family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,500;1,600"},
+  "friendly":{d:'"Nunito",system-ui,sans-serif', b:'"Nunito",system-ui,sans-serif', a:'"Merriweather",Georgia,serif',
+              href:G+"family=Nunito:wght@400;500;600;700;800&family=Merriweather:ital,wght@1,400;1,700"},
+  "classic": {d:'"Libre Baskerville",Georgia,serif', b:'"Source Sans 3",system-ui,sans-serif', a:'"Libre Baskerville",Georgia,serif',
+              href:G+"family=Libre+Baskerville:ital,wght@0,700;1,400&family=Source+Sans+3:wght@400;500;600;700"},
+  "elegant": {d:'"DM Serif Display",Georgia,serif', b:'"DM Sans",system-ui,sans-serif', a:'"DM Serif Display",Georgia,serif',
+              href:G+"family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600;700"},
+  "bold":    {d:'"Plus Jakarta Sans",system-ui,sans-serif', b:'"Plus Jakarta Sans",system-ui,sans-serif', a:'"Lora",Georgia,serif',
+              href:G+"family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@1,500;1,600"}
+};
+function hexToHsl(hex){ let h=String(hex||"").replace("#",""); if(h.length===3) h=[...h].map(c=>c+c).join(""); if(!/^[0-9a-f]{6}$/i.test(h)) return null;
+  const [r,g,b]=[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)/255), mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2; let hh=0,ss=0;
+  if(mx!==mn){ const d=mx-mn; ss=l>.5?d/(2-mx-mn):d/(mx+mn); hh=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4; hh*=60; }
+  return [hh,ss*100,l*100]; }
+const hsl=(h,s,l)=>`hsl(${h.toFixed(1)} ${s.toFixed(1)}% ${l.toFixed(1)}%)`;
+function scaleFromColor(hex){ // build a full 50…950 scale around any main color
+  const c=hexToHsl(hex); if(!c) return COLOR_THEMES.orange; const [h,s0]=c, s=Math.min(96,Math.max(40,s0));
+  const L=[97,94,87,77,66,55,47,39,32,26,15], S=[s*.9,s*.9,s*.92,s*.95,s,s,s*.97,s*.92,s*.86,s*.8,s*.78];
+  return L.map((l,i)=>hsl(h,Math.min(100,S[i]),l)); }
+function themeVars(T){
+  const vars={}; const scale=T.colors==="custom"?scaleFromColor(T.customColor):(COLOR_THEMES[T.colors]||COLOR_THEMES.orange);
+  STEPS.forEach((st,i)=>vars["--p-"+st]=scale[i]);
+  const F=FONT_THEMES[T.fonts]||FONT_THEMES["avant-cooper"];
+  vars["--f-display"]=F.d; vars["--f-body"]=F.b; vars["--f-serif"]=F.a;
+  vars["--logo-radius"]={round:"50%",rounded:"14px",square:"4px"}[T.logoShape]||"50%";
+  return {vars, font:F.href};
+}
+function applyTheme(T){
+  const root=document.documentElement;
+  if(!T){ try{localStorage.removeItem("sfc-theme")}catch(e){} return; }
+  const {vars,font}=themeVars(T);
+  Object.entries(vars).forEach(([k,v])=>root.style.setProperty(k,v));
+  root.dataset.logo=T.logoShape==="original"?"original":"";
+  if(font && !document.querySelector(`link[data-theme-font][href="${font}"]`)){
+    $$("link[data-theme-font]").forEach(l=>l.remove());
+    const l=document.createElement("link"); l.rel="stylesheet"; l.href=font; l.dataset.themeFont=""; document.head.appendChild(l);
+  } else if(!font) $$("link[data-theme-font]").forEach(l=>l.remove());
+  // logo + name in header/footer, favicon, browser UI color
+  const logo=has(T.logo)?src(T.logo):"";
+  if(logo){ $$(".brand img,.fbrand img").forEach(i=>i.src=logo); const fav=$('link[rel="icon"][type="image/png"]')||$('link[rel="icon"]'); if(fav){ fav.href=logo; fav.removeAttribute("sizes"); fav.type=""; } }
+  if(has(T.brandName)) $$(".brand b").forEach(b=>b.textContent=T.brandName);
+  if(has(T.brandSub)) $$(".brand small").forEach(b=>b.textContent=T.brandSub);
+  if(has(T.brandName)) $$(".fbrand b").forEach(b=>b.innerHTML=esc(T.brandName)+(has(T.brandSub)?"<br>"+esc(T.brandSub):""));
+  const tc=$('meta[name="theme-color"]'); if(tc) tc.content=getComputedStyle(root).getPropertyValue("--stage").trim()||tc.content;
+  // remember for the next page view (applied before first paint by the small script in <head>)
+  try{ localStorage.setItem("sfc-theme",JSON.stringify({vars,font,logo,shape:T.logoShape||"round"})); }catch(e){}
+}
+
 /* ---------- content ---------- */
 const CONTENT_FILES=["settings","home","bereans","events","ministries","sermons","gallery"];
-let SITE=null;
+let SITE=null, SITE_THEME=null;
 async function loadContent(){
   const parts=await Promise.all(CONTENT_FILES.map(f=>fetch(`content/${f}.json`,{cache:"no-cache"}).then(r=>{ if(!r.ok) throw new Error(f); return r.json(); })));
   const [settings,home,bereans,ev,min,ser,gal]=parts;
+  SITE_THEME=await fetch("content/theme.json",{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
   SITE={...settings, home, bereans, events:ev.events||[], ministries:min.ministries||[], sermons:ser.sermons||[], gallery:gal.photos||[]};
   // services: the admin picks a day name; the page works with 0–6
   SITE.services=(SITE.services||[]).map(x=>({...x, day:Math.max(0,DAYS.indexOf(x.day))}));
@@ -330,7 +394,8 @@ function wind(){
   const cv=$("#wind"), ctx=cv.getContext("2d"); if(!ctx) return;
   let W,H,dpr, ribbons=[], t=0, visible=true;
   function size(){dpr=Math.min(devicePixelRatio||1,2); W=cv.clientWidth; H=cv.clientHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);}
-  function mk(i){return {y:H*(.25+Math.random()*.6), amp:30+Math.random()*70, f:.0016+Math.random()*.0022, sp:.25+Math.random()*.45, ph:Math.random()*6.28, w:.6+Math.random()*1.6, a:.10+Math.random()*.22, hue:22+Math.random()*16};}
+  const baseHue=(()=>{ const v=getComputedStyle(document.documentElement).getPropertyValue("--p-500").trim(); const m=v.match(/^hsl\(([\d.]+)/); if(m) return +m[1]; const c=hexToHsl(v); return c?c[0]:25; })();
+  function mk(i){return {y:H*(.25+Math.random()*.6), amp:30+Math.random()*70, f:.0016+Math.random()*.0022, sp:.25+Math.random()*.45, ph:Math.random()*6.28, w:.6+Math.random()*1.6, a:.10+Math.random()*.22, hue:baseHue-4+Math.random()*16};}
   size(); ribbons=Array.from({length: W<700?7:13}, mk);
   addEventListener("resize",()=>{size();});
   new IntersectionObserver(es=>{visible=es[0].isIntersecting;}).observe(cv);
@@ -350,6 +415,7 @@ function wind(){
   onScroll(); initSmooth();
   try{ await loadContent(); }
   catch(err){ console.error("Could not load content/*.json", err); $("#loadError").hidden=false; initMotion(); return; }
+  applyTheme(SITE_THEME);
   SITE.verses=(SITE.home&&SITE.home.verses)||[];
   $("#vDots").innerHTML=SITE.verses.map(()=>"<i></i>").join("");
   if(!SITE.verses.length) $("#scripture").hidden=true;

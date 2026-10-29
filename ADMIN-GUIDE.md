@@ -10,7 +10,7 @@ A guide for Spiritwind Fellowship Church website admins. You don't need to know 
    **https://spiritwindfc.github.io/spiritwindfc-web/admin/**
 2. Click **Sign In with GitHub** and log in with your GitHub account.
    (The first time, GitHub asks you to **Authorize** the website admin. Click the green button.)
-3. You'll see a menu on the left: **Events, Sermons, Photo gallery, Ministries, School of Bereans, Home page, Church info & contacts.**
+3. You'll see a menu on the left: **Events, Sermons, Photo gallery, Ministries, School of Bereans, Home page, Church info & contacts, Look & feel.**
 
 > Can't sign in? Ask the web developer to check that your GitHub account was added to the church's organization.
 
@@ -63,6 +63,15 @@ When you pick a photo you can **upload a new one** or **choose one already on th
 
 ### Ministries
 **Ministries**: add a card for each ministry with a name, photo, short description and when it meets.
+
+### Change the logo, fonts or colors
+**Look & feel**:
+- **Logo**: upload a new logo (a square image works best) and pick its **shape**. Use *Original* for wide logos so nothing gets cropped. It also becomes the icon in the browser tab.
+- **Name next to the logo** and the **small line** under it.
+- **Font style**: choose one of the tested font pairings. *Signature* is the original Avant Garde + Cooper look.
+- **Color theme**: choose a ready-made theme, or *Custom* and pick a main color. All the lighter and darker shades are created for you, for both light and dark mode.
+
+Tip: change one thing at a time, **Save**, wait a minute, and look at the website on your phone before changing the next thing. To go back, choose *Signature* and *Spiritwind Orange*.
 
 ### About us, Bible verses, Plan your visit
 **Home page**:

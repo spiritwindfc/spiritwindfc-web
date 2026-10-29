@@ -374,3 +374,62 @@ collections:
                   - { label: Formspree, value: formspree }
                   - { label: Custom endpoint, value: custom }
               - { name: endpoint, label: Form endpoint URL, widget: string, required: false, hint: "For Formspree: https://formspree.io/f/xxxxxxx" }
+
+  # ───────────────────────── LOOK & FEEL ─────────────────────────
+  - name: theme
+    label: Look & feel
+    icon: palette
+    description: Logo, fonts and color theme for the whole website.
+    files:
+      - name: theme
+        label: Look & feel
+        icon: palette
+        file: content/theme.json
+        fields:
+          - name: logo
+            label: Logo
+            widget: image
+            hint: Shown in the header, the footer and the browser tab. A square image works best.
+          - name: logoShape
+            label: Logo shape
+            widget: select
+            default: round
+            options:
+              - { label: Round (circle), value: round }
+              - { label: Rounded square, value: rounded }
+              - { label: Square, value: square }
+              - { label: "Original (no cropping — for wide logos)", value: original }
+          - { name: brandName, label: Name next to the logo, widget: string, hint: "e.g. Spiritwind" }
+          - { name: brandSub, label: Small line under the name, widget: string, required: false, hint: "e.g. Fellowship Church" }
+          - name: fonts
+            label: Font style
+            widget: select
+            default: avant-cooper
+            hint: Each style is a tested pairing of a heading font, a body font and an accent font for highlighted words and Bible verses.
+            options:
+              - { label: "Signature — Avant Garde + Cooper (default)", value: avant-cooper }
+              - { label: "Modern — Montserrat + Open Sans + Playfair", value: modern }
+              - { label: "Friendly — Nunito + Merriweather", value: friendly }
+              - { label: "Classic — Libre Baskerville + Source Sans", value: classic }
+              - { label: "Elegant — DM Serif Display + DM Sans", value: elegant }
+              - { label: "Bold — Plus Jakarta Sans + Lora", value: bold }
+          - name: colors
+            label: Color theme
+            widget: select
+            default: orange
+            hint: Changes buttons, highlights, backgrounds and dark sections across the whole site, in light and dark mode.
+            options:
+              - { label: Spiritwind Orange (default), value: orange }
+              - { label: Golden Amber, value: gold }
+              - { label: Crimson Red, value: red }
+              - { label: Royal Violet, value: violet }
+              - { label: Royal Blue, value: blue }
+              - { label: Teal, value: teal }
+              - { label: Forest Green, value: green }
+              - { label: "Custom — use the color below", value: custom }
+          - name: customColor
+            label: Custom main color
+            widget: color
+            required: false
+            default: "#F97316"
+            hint: Only used when Color theme is "Custom". Pick a bright, saturated color; lighter and darker shades are made from it automatically.

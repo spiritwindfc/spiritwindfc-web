@@ -25,7 +25,8 @@ spiritwind-website/
 │   ├── sermons.json        ← sermon highlights
 │   ├── ministries.json     ← ministry cards
 │   ├── gallery.json        ← "Sundays at SFC" photos
-│   └── bereans.json        ← School of Bereans
+│   ├── bereans.json        ← School of Bereans
+│   └── theme.json          ← logo, font style, color theme ("Look & feel")
 ├── admin/
 │   ├── index.html          ← the admin page (loads Sveltia CMS 0.239.1 from unpkg)
 │   └── config.yml          ← which fields admins can edit, labels, help text, photo resizing
@@ -69,6 +70,7 @@ python3 -m http.server 8000      # then open http://localhost:8000
 | `ministries.json` | `ministries[] {name, image, text, when, link}` | Ministries (pads to 3 cards with a "coming soon" card) |
 | `gallery.json` | `photos[] {image, caption, size: normal|tall|wide}` | Gallery + lightbox |
 | `bereans.json` | intro, verse, poster, milestone, latest, schedule, enroll, `levels[5]` | School of Bereans |
+| `theme.json` | `logo, logoShape (round/rounded/square/original), brandName, brandSub, fonts (preset key), colors (preset key or custom), customColor` | logo, fonts and the whole color palette (see "Theming") |
 
 Image paths are stored by the CMS as `/assets/img/…`. `main.js` strips the leading slash so they also work when the site lives in a sub-folder (`<org>.github.io/spiritwind-website/`).
 
@@ -109,6 +111,16 @@ GitHub Pages can't receive form posts, so connect **Formspree** (free tier): cre
 - Next Sunday's date is calculated in Philippine time (Asia/Manila)
 - SEO: meta description, Open Graph share image, `Church` structured data, sitemap
 - Content loads with `cache: no-cache`, so admin edits show as soon as GitHub Pages has republished
+
+## Theming (logo, fonts, colors)
+
+Admins change these under **/admin → Look & feel** (`content/theme.json`). How it works:
+
+- **Colors**: the whole palette derives from an 11-step brand scale, `--p-50 … --p-950`, in `styles.css`. Neutrals (dark sections, text, dark-mode backgrounds) are mixed from it with `color-mix()`. `main.js` (`COLOR_THEMES`) sets the scale on `<html>` from a preset, or builds one from a custom color (`scaleFromColor`). To add a preset, add an 11-color array to `COLOR_THEMES` and an option to the `colors` select in `admin/config.yml`.
+- **Fonts**: `FONT_THEMES` in `main.js` maps each preset to heading, body and accent fonts (Google Fonts, loaded on demand). `avant-cooper` uses the self-hosted files and loads nothing extra. To add a pairing, add an entry and a matching option in `config.yml`.
+- **Logo**: replaces the header and footer logo and the favicon, and sets the logo shape via `--logo-radius` (or `data-logo="original"`).
+- **No flash of the old theme**: `main.js` caches the resolved theme in `localStorage` (`sfc-theme`), and a tiny inline script in each page's `<head>` applies it before first paint.
+- Static files not covered by the admin: `favicon.ico`, `assets/icons/*`, `og-image.jpg` and `site.webmanifest` colors. Update those by hand if the church rebrands.
 
 ## Fonts & colors
 
