@@ -130,9 +130,15 @@ function render(){
      <div class="facts"><span>${ICON.clock}${esc(s0.time)} ${esc(s0.ampm)}</span><span>${ICON.pin}${esc(SITE.addressShort||SITE.address)}</span></div>
      <button class="btn" data-event="weekly">Event details ${ICON.arrow}</button></article>`;
   const rest = upcoming.slice(feat?1:0);
-  const side = rest.length ? `<div class="slist">${rest.map((e,i)=>`<button class="sitem rv" style="color:inherit;text-align:left;border:0;font:inherit;cursor:pointer;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)" data-event="${i+(feat?1:0)}"><img src="${esc(src(e.image)||"assets/img/logo.webp")}" alt=""><span><b>${esc(e.title)}</b><small style="color:var(--muted)">${fmtDate(e.date)} · ${esc(e.time||"")}</small></span><span class="arr">${ICON.arrow}</span></button>`).join("")}</div>`
-     : `<div class="empty rv">${todo("No special events yet")}<h3>Special events will show up here.</h3><p>Conferences, youth nights, outreach and celebrations are announced here and on our Facebook page.</p><a class="btn btn-ghost" style="align-self:flex-start;color:var(--otext)" href="${esc(SITE.social.facebook)}" target="_blank" rel="noopener">Follow updates on Facebook</a></div>`;
-  $("#eventGrid").innerHTML=featHTML+side;
+  const grid=$("#eventGrid");
+  if(feat){
+    grid.className="evwrap";
+    const more = rest.length ? `<div class="emore"><h3 class="emore-h rv">More upcoming events</h3><div class="ecards">${rest.map((e,i)=>eventCard(e,i+1)).join("")}</div></div>` : "";
+    grid.innerHTML=featHTML+more;
+  } else {
+    grid.className="egrid";
+    grid.innerHTML=featHTML+`<div class="empty rv">${todo("No special events yet")}<h3>Special events will show up here.</h3><p>Conferences, youth nights, outreach and celebrations are announced here and on our Facebook page.</p><a class="btn btn-ghost" style="align-self:flex-start;color:var(--otext)" href="${esc(SITE.social.facebook)}" target="_blank" rel="noopener">Follow updates on Facebook</a></div>`;
+  }
   window._upcoming=upcoming;
 
   // gallery
@@ -188,8 +194,14 @@ function renderBereans(){
   $("#sobLatest").innerHTML=has(B.latest?.title)?`${ICON.cal}<span>Latest: <b>${esc(B.latest.title)}</b> · ${esc(B.latest.date||"")}</span>`:"";
 }
 function fmtDate(s){const [y,m,d]=s.split("-").map(Number); return `${MON[m-1]} ${d}, ${y}`;}
-function eventFeat(e){const [y,m,d]=e.date.split("-").map(Number);
-  return `<article class="efeat rv"><div class="when"><div class="cal"><small>${MON[m-1]}</small><b>${d}</b></div><div><div class="tag">Featured event</div><h3>${esc(e.title)}</h3></div></div><p>${esc(e.text||"")}</p><div class="facts"><span>${ICON.clock}${esc(e.time||"")}</span><span>${ICON.pin}${esc(e.location||"")}</span></div><button class="btn" data-event="0">Event details ${ICON.arrow}</button></article>`;}
+function poster(e,cls,idx){ const p=esc(src(e.image));
+  return `<button class="${cls}" data-event="${idx}" aria-label="View details: ${esc(e.title)}"><span class="pblur" style="background-image:url('${p}')"></span><img src="${p}" alt="Event poster: ${esc(e.title)}" loading="lazy"></button>`; }
+function eventFeat(e){const [y,m,d]=e.date.split("-").map(Number); const img=has(e.image);
+  const facts=[has(e.time)?`<span>${ICON.clock}${esc(e.time)}</span>`:"", has(e.location)?`<span>${ICON.pin}${esc(e.location)}</span>`:""].join("");
+  return `<article class="efeat rv${img?" has-img":""}"><div class="ebody"><div class="when"><div class="cal"><small>${MON[m-1]}</small><b>${d}</b></div><div><div class="tag">Featured event · ${DAYS[new Date(Date.UTC(y,m-1,d)).getUTCDay()]}</div><h3>${esc(e.title)}</h3></div></div>${has(e.text)?`<p>${esc(e.text)}</p>`:""}${facts?`<div class="facts">${facts}</div>`:""}<button class="btn" data-event="0">Event details ${ICON.arrow}</button></div>${img?poster(e,"eposter",0):""}</article>`;}
+function eventCard(e,idx){const [y,m,d]=e.date.split("-").map(Number);
+  const media=has(e.image)?`<span class="pblur" style="background-image:url('${esc(src(e.image))}')"></span><img src="${esc(src(e.image))}" alt="Event poster: ${esc(e.title)}" loading="lazy">`:`<span class="ph-cal"><small>${MON[m-1]}</small><b>${d}</b></span>`;
+  return `<button class="ecard rv" data-event="${idx}"><span class="ph">${media}</span><span class="eb"><span class="edate">${ICON.cal}${DAYS[new Date(Date.UTC(y,m-1,d)).getUTCDay()].slice(0,3)}, ${fmtDate(e.date)}${has(e.time)?" · "+esc(e.time):""}</span><b>${esc(e.title)}</b>${has(e.location)?`<span class="eloc">${ICON.pin}<span>${esc(e.location)}</span></span>`:""}<span class="more">Details ${ICON.arrow}</span></span></button>`;}
 
 /* ---------- dialogs ---------- */
 const dlg=$("#dlg");
@@ -201,7 +213,7 @@ document.addEventListener("click",e=>{
   const ev=e.target.closest("[data-event]"); if(ev){
     if(ev.dataset.event==="weekly"){const s=SITE.services[0], nx=nextService(s);
       openModal(`<span class="eyebrow">Every ${DAYS[s.day]}</span><h3>${esc(s.name)}</h3><p>${esc(SITE.motto)} A day filled with worship, fellowship and the living Word of God.</p><ul><li><b>Time:</b> ${esc(s.time)} ${esc(s.ampm)}</li><li><b>Next:</b> ${DAYS[nx.date.getUTCDay()]}, ${MON[nx.date.getUTCMonth()]} ${nx.date.getUTCDate()}, ${nx.date.getUTCFullYear()}</li><li><b>Where:</b> ${esc(SITE.address)}</li></ul><p><a class="btn btn-primary" href="${esc(SITE.mapsUrl)}" target="_blank" rel="noopener">Get directions</a></p>`);}
-    else {const x=window._upcoming[+ev.dataset.event]; openModal(`<span class="eyebrow">${fmtDate(x.date)}</span>${has(x.image)?`<img src="${esc(src(x.image))}" alt="" style="width:100%;border-radius:16px;margin:14px 0 4px;max-height:260px;object-fit:cover">`:""}<h3>${esc(x.title)}</h3>${paras(x.text)}<ul><li><b>Time:</b> ${esc(x.time||"")}</li><li><b>Where:</b> ${esc(x.location||"")}</li></ul>${x.url?`<p><a class="btn btn-primary" href="${esc(x.url)}" target="_blank" rel="noopener">More info</a></p>`:""}`);}
+    else {const x=window._upcoming[+ev.dataset.event]; openModal(`<span class="eyebrow">${fmtDate(x.date)}</span>${has(x.image)?`<img class="mposter" src="${esc(src(x.image))}" alt="Event poster: ${esc(x.title)}">`:""}<h3>${esc(x.title)}</h3>${paras(x.text)}<ul>${has(x.time)?`<li><b>Time:</b> ${esc(x.time)}</li>`:""}${has(x.location)?`<li><b>Where:</b> ${esc(x.location)}</li>`:""}</ul>${x.url?`<p><a class="btn btn-primary" href="${esc(x.url)}" target="_blank" rel="noopener">More info</a></p>`:""}`);}
     return;}
   const c=e.target.closest("[data-copy]"); if(c){copy(c.dataset.copy); return;}
   const q=e.target.closest("[data-inquiry]"); if(q){$("#f-topic").value=q.dataset.inquiry;}
