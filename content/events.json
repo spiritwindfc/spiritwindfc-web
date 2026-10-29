@@ -1,3 +1,13 @@
 {
-  "events": []
+  "events": [
+    {
+      "title": "God's Engagement",
+      "date": "2026-11-30",
+      "time": "7:00AM - 9:00PM",
+      "location": "SFC Worship Hub",
+      "text": "Sample description",
+      "image": "/assets/img/pasted-image-1793252092472.webp",
+      "url": "https://facebook.com"
+    }
+  ]
 }
