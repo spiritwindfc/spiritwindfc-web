@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-# Replace example.com with your real domain
-Sitemap: https://www.example.com/sitemap.xml
+Sitemap: https://spiritwindfc.github.io/spiritwindfc-web/sitemap.xml

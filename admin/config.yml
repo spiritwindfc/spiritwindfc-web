@@ -1,11 +1,11 @@
 # Spiritwind Fellowship Church — website admin (Sveltia CMS)
 # Docs: https://sveltiacms.app/en/docs
 #
-# ▸ BEFORE GOING LIVE, change the two lines marked "CHANGE ME" below.
+# ▸ After setting up the login helper, uncomment base_url below (marked "CHANGE ME").
 
 backend:
   name: github
-  repo: YOUR-GITHUB-ORG/spiritwind-website        # CHANGE ME: <organization>/<repository>
+  repo: spiritwindfc/spiritwindfc-web
   branch: main
   # base_url: https://sveltia-cms-auth.YOUR-SUBDOMAIN.workers.dev   # CHANGE ME: uncomment after setting up the login helper
   commit_messages:
@@ -14,7 +14,7 @@ backend:
     deleteMedia: "Delete {{path}} (via website admin)"
 
 app_title: SFC Website Admin
-site_url: https://YOUR-GITHUB-ORG.github.io/spiritwind-website/   # CHANGE ME: your live site address (or custom domain)
+site_url: https://spiritwindfc.github.io/spiritwindfc-web/   # change if you add a custom domain
 
 # Uploaded photos go next to the existing church photos, so admins can reuse them.
 media_folder: assets/img

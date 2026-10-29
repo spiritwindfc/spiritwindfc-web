@@ -7,7 +7,7 @@ A guide for Spiritwind Fellowship Church website admins. You don't need to know 
 ## Signing in
 
 1. Go to the website address and add **`/admin`** at the end.
-   Example: `https://YOUR-GITHUB-ORG.github.io/spiritwind-website/admin`
+   **https://spiritwindfc.github.io/spiritwindfc-web/admin/**
 2. Click **Sign In with GitHub** and log in with your GitHub account.
    (The first time, GitHub asks you to **Authorize** the website admin. Click the green button.)
 3. You'll see a menu on the left: **Events, Sermons, Photo gallery, Ministries, School of Bereans, Home page, Church info & contacts.**
