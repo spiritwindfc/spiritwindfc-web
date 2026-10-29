@@ -1,0 +1,377 @@
+# Spiritwind Fellowship Church — website admin (Sveltia CMS)
+# Docs: https://sveltiacms.app/en/docs
+#
+# ▸ BEFORE GOING LIVE, change the two lines marked "CHANGE ME" below.
+
+backend:
+  name: github
+  repo: YOUR-GITHUB-ORG/spiritwind-website        # CHANGE ME: <organization>/<repository>
+  branch: main
+  # base_url: https://sveltia-cms-auth.YOUR-SUBDOMAIN.workers.dev   # CHANGE ME: uncomment after setting up the login helper
+  commit_messages:
+    update: "Update {{collection}}: {{path}} (via website admin)"
+    uploadMedia: "Upload {{path}} (via website admin)"
+    deleteMedia: "Delete {{path}} (via website admin)"
+
+app_title: SFC Website Admin
+site_url: https://YOUR-GITHUB-ORG.github.io/spiritwind-website/   # CHANGE ME: your live site address (or custom domain)
+
+# Uploaded photos go next to the existing church photos, so admins can reuse them.
+media_folder: assets/img
+public_folder: /assets/img
+media_libraries:
+  default:
+    config:
+      max_file_size: 15000000          # 15 MB per file (before shrinking)
+      slugify_filename: true
+      transformations:                 # every uploaded photo is resized and converted to WebP
+        raster_image:
+          format: webp
+          quality: 82
+          width: 1800
+          height: 1800
+
+collections:
+  # ───────────────────────── EVENTS ─────────────────────────
+  - name: events
+    label: Events
+    icon: event
+    description: Special events (conferences, youth nights, outreach). Past events hide from the website automatically.
+    files:
+      - name: events
+        label: Upcoming events
+        icon: event
+        file: content/events.json
+        fields:
+          - name: events
+            label: Events
+            label_singular: Event
+            widget: list
+            required: false
+            add_to_top: true
+            summary: "{{fields.date}} · {{fields.title}}"
+            hint: The soonest event is featured in a big orange card. Sunday Celebration doesn't need to be added here; it shows automatically.
+            fields:
+              - { name: title, label: Event name, widget: string }
+              - { name: date, label: Date, widget: datetime, type: date, format: YYYY-MM-DD }
+              - { name: time, label: Time, widget: string, required: false, hint: "e.g. 6:00 PM" }
+              - { name: location, label: Place, widget: string, required: false, hint: "e.g. SFC Worship Hub, 4th Floor CMS Building" }
+              - { name: text, label: Description, widget: text, required: false }
+              - { name: image, label: Photo or poster, widget: image, required: false }
+              - name: url
+                label: Registration or info link
+                widget: string
+                required: false
+                hint: Optional. A Facebook post, Google Form, etc.
+                pattern: ['^(https?://\S+)?$', 'Start the link with https://']
+
+  # ───────────────────────── SERMONS ─────────────────────────
+  - name: sermons
+    label: Sermons
+    icon: play_circle
+    description: Sermon highlights shown in "Hear the living Word".
+    files:
+      - name: sermons
+        label: Sermons
+        icon: play_circle
+        file: content/sermons.json
+        fields:
+          - name: sermons
+            label: Sermons
+            label_singular: Sermon
+            widget: list
+            add_to_top: true
+            min: 1
+            summary: "{{fields.title}}"
+            hint: Put the newest sermon at the top. Turn on "Featured" for the one to show in the large card.
+            fields:
+              - { name: title, label: Title or key quote, widget: string }
+              - { name: image, label: Thumbnail or quote graphic, widget: image }
+              - { name: speaker, label: Speaker, widget: string, required: false }
+              - { name: scripture, label: Scripture, widget: string, required: false, hint: "e.g. Romans 8:28" }
+              - { name: date, label: Date preached, widget: datetime, type: date, format: YYYY-MM-DD, required: false }
+              - name: url
+                label: Video link
+                widget: string
+                hint: Facebook or YouTube link to the sermon video.
+                pattern: ['^https?://\S+$', 'Paste a full link starting with https://']
+              - { name: featured, label: Featured, widget: boolean, default: false, required: false }
+
+  # ───────────────────────── GALLERY ─────────────────────────
+  - name: gallery
+    label: Photo gallery
+    icon: photo_library
+    description: Photos in the "Sundays at SFC" gallery.
+    files:
+      - name: gallery
+        label: Gallery photos
+        icon: photo_library
+        file: content/gallery.json
+        fields:
+          - name: photos
+            label: Photos
+            label_singular: Photo
+            widget: list
+            summary: "{{fields.caption}}"
+            hint: 9 photos fill the grid nicely (1 tall + 2 wide + 6 normal). Drag to reorder.
+            fields:
+              - { name: image, label: Photo, widget: image }
+              - { name: caption, label: Caption, widget: string, required: false, hint: "Short, e.g. Prayer time" }
+              - name: size
+                label: Tile size
+                widget: select
+                default: normal
+                options:
+                  - { label: Normal, value: normal }
+                  - { label: Tall (portrait photos), value: tall }
+                  - { label: Wide (landscape photos), value: wide }
+
+  # ───────────────────────── MINISTRIES ─────────────────────────
+  - name: ministries
+    label: Ministries
+    icon: volunteer_activism
+    description: Cards in "Find your place to serve".
+    files:
+      - name: ministries
+        label: Ministries
+        icon: volunteer_activism
+        file: content/ministries.json
+        fields:
+          - name: ministries
+            label: Ministries
+            label_singular: Ministry
+            widget: list
+            summary: "{{fields.name}}"
+            fields:
+              - { name: name, label: Ministry name, widget: string }
+              - { name: image, label: Photo, widget: image, required: false }
+              - { name: text, label: Short description, widget: text, hint: "One or two sentences." }
+              - { name: when, label: When it meets, widget: string, required: false, hint: "e.g. Every Sunday, Fridays 7 PM" }
+              - { name: link, label: Learn-more link, widget: string, required: false, hint: "Leave empty to send people to the contact form." }
+
+  # ───────────────────────── SCHOOL OF BEREANS ─────────────────────────
+  - name: bereans
+    label: School of Bereans
+    icon: school
+    files:
+      - name: bereans
+        label: School of Bereans
+        icon: school
+        file: content/bereans.json
+        fields:
+          - { name: intro, label: Introduction, widget: text }
+          - name: verse
+            label: Theme verse
+            widget: object
+            fields:
+              - { name: text, label: Verse text, widget: text }
+              - { name: ref, label: Reference, widget: string, hint: "e.g. Acts 17:11 · KJV" }
+          - { name: schedule, label: Class schedule, widget: string, required: false, hint: "e.g. Saturdays, 2:00 PM" }
+          - name: enroll
+            label: Enrollment link
+            widget: string
+            required: false
+            hint: Optional sign-up link (e.g. a Google Form). If empty, "Ask about enrolling" opens the contact form.
+            pattern: ['^(https?://\S+)?$', 'Start the link with https://']
+          - { name: hashtag, label: Hashtag, widget: string, required: false }
+          - { name: poster, label: Featured poster, widget: image, required: false }
+          - name: milestone
+            label: Poster caption
+            widget: object
+            fields:
+              - { name: title, label: Title, widget: string, required: false }
+              - { name: date, label: Date, widget: string, required: false, hint: "e.g. April 26, 2026" }
+              - { name: note, label: Note, widget: string, required: false }
+          - name: latest
+            label: Latest ceremony
+            widget: object
+            fields:
+              - { name: title, label: Title, widget: string, required: false }
+              - { name: date, label: Date, widget: string, required: false }
+          - { name: theme, label: Theme (for reference), widget: string, required: false }
+          - name: levels
+            label: Levels
+            label_singular: Level
+            widget: list
+            allow_add: false
+            summary: "{{fields.name}}"
+            hint: The five levels, in order from Lamb to Lion.
+            fields:
+              - { name: name, label: Level name, widget: string }
+              - { name: logo, label: Level logo, widget: image }
+              - { name: text, label: What this level covers, widget: text, required: false }
+
+  # ───────────────────────── HOME PAGE ─────────────────────────
+  - name: home
+    label: Home page
+    icon: home
+    description: Big photos and text on the main page.
+    files:
+      - name: home
+        label: Home page
+        icon: home
+        file: content/home.json
+        fields:
+          - name: hero
+            label: Top banner
+            widget: object
+            fields:
+              - { name: image, label: Background photo, widget: image, hint: "A wide (landscape) photo works best." }
+              - { name: line1, label: Headline line 1, widget: string }
+              - { name: line2, label: Headline line 2 (orange), widget: string }
+              - { name: sub, label: Text under the headline, widget: text }
+              - name: verse
+                label: Corner verse
+                widget: object
+                fields:
+                  - { name: text, label: Verse, widget: text, required: false }
+                  - { name: ref, label: Reference, widget: string, required: false }
+          - name: welcome
+            label: Welcome section
+            widget: object
+            fields:
+              - { name: text, label: Welcome text, widget: text }
+              - name: points
+                label: Highlights
+                label_singular: Highlight
+                widget: list
+                summary: "{{fields.title}}"
+                fields:
+                  - { name: title, label: Bold word, widget: string }
+                  - { name: text, label: Rest of the sentence, widget: string }
+              - name: quote
+                label: Quote
+                widget: object
+                fields:
+                  - { name: text, label: Quote, widget: text, required: false }
+                  - { name: note, label: Small text under the quote, widget: string, required: false }
+              - name: photoMain
+                label: Photo 1 (large, left)
+                widget: object
+                fields:
+                  - { name: image, label: Photo, widget: image }
+                  - { name: alt, label: Describe the photo, widget: string, hint: "For blind visitors and Google, e.g. 'The congregation worshiping'" }
+              - name: photoTop
+                label: Photo 2 (top right)
+                widget: object
+                fields:
+                  - { name: image, label: Photo, widget: image }
+                  - { name: alt, label: Describe the photo, widget: string }
+              - name: photoBottom
+                label: Photo 3 (bottom right)
+                widget: object
+                fields:
+                  - { name: image, label: Photo, widget: image }
+                  - { name: alt, label: Describe the photo, widget: string }
+          - name: worship
+            label: Worship section
+            widget: object
+            fields:
+              - { name: image, label: Background photo (shown blurred), widget: image }
+              - { name: text, label: Text, widget: text }
+          - name: pillars
+            label: About us cards
+            label_singular: Card
+            widget: list
+            allow_add: false
+            summary: "{{fields.title}}"
+            fields:
+              - { name: title, label: Title, widget: string }
+              - { name: highlight, label: Short statement (large text), widget: string, required: false, hint: "Leave empty to show 'Coming soon'." }
+              - { name: summary, label: Card text, widget: text }
+              - { name: body, label: Full text (opens on click), widget: text, hint: "Leave a blank line between paragraphs." }
+              - name: icon
+                label: Icon
+                widget: select
+                options:
+                  - { label: Heart, value: heart }
+                  - { label: Compass, value: compass }
+                  - { label: Book, value: book }
+                  - { label: Flame, value: flame }
+          - name: verses
+            label: Scripture carousel
+            label_singular: Verse
+            widget: list
+            summary: "{{fields.ref}}"
+            fields:
+              - { name: text, label: Verse, widget: text }
+              - { name: ref, label: Reference, widget: string, hint: "e.g. John 3:8 · KJV" }
+          - name: visit
+            label: Plan your visit
+            widget: object
+            fields:
+              - name: steps
+                label: First-visit steps
+                label_singular: Step
+                widget: list
+                summary: "{{fields.title}}"
+                fields:
+                  - { name: title, label: Step, widget: string }
+                  - { name: text, label: Details, widget: text }
+              - { name: kids, label: Kids & families, widget: text, required: false, hint: "Leave empty to show 'Coming soon'." }
+              - { name: parking, label: Getting there / parking, widget: text, required: false }
+
+  # ───────────────────────── CHURCH INFO ─────────────────────────
+  - name: settings
+    label: Church info & contacts
+    icon: church
+    description: Name, service times, address, contacts, social links and the contact form.
+    files:
+      - name: settings
+        label: Church info & contacts
+        icon: church
+        file: content/settings.json
+        fields:
+          - { name: name, label: Church name, widget: string }
+          - { name: short, label: Short name, widget: string }
+          - { name: tagline, label: Tagline, widget: string }
+          - { name: motto, label: Motto, widget: string }
+          - { name: followers, label: Facebook followers, widget: string, required: false, hint: "e.g. 3.3K. Leave empty to hide the badge." }
+          - name: services
+            label: Service times
+            label_singular: Service
+            widget: list
+            min: 1
+            summary: "{{fields.day}} {{fields.time}} {{fields.ampm}} · {{fields.name}}"
+            hint: The first service is the main one, shown in the banner and "Plan your visit".
+            fields:
+              - name: day
+                label: Day
+                widget: select
+                options: [Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday]
+              - name: time
+                label: Time
+                widget: string
+                hint: "e.g. 9:00"
+                pattern: ['^([1-9]|1[0-2]):[0-5][0-9]$', 'Use h:mm, e.g. 9:00 or 10:30']
+              - { name: ampm, label: AM / PM, widget: select, options: [AM, PM] }
+              - { name: name, label: Service name, widget: string }
+              - { name: note, label: Short note, widget: string, required: false }
+          - { name: address, label: Full address, widget: string }
+          - { name: addressShort, label: Address line 1 (short), widget: string, hint: "e.g. 4th Floor, CMS Building" }
+          - { name: addressLine2, label: Address line 2, widget: string, required: false }
+          - { name: mapsUrl, label: Google Maps link, widget: string }
+          - { name: email, label: Email, widget: string, pattern: ['^\S+@\S+\.\S+$', 'Enter a valid email address'] }
+          - { name: phone, label: Phone, widget: string, required: false }
+          - name: social
+            label: Social media links
+            widget: object
+            fields:
+              - { name: facebook, label: Facebook, widget: string }
+              - { name: instagram, label: Instagram, widget: string, required: false }
+              - { name: tiktok, label: TikTok, widget: string, required: false }
+              - { name: youtube, label: YouTube, widget: string, required: false }
+          - name: form
+            label: Contact form
+            widget: object
+            hint: Where website messages are delivered. Ask the web developer before changing this.
+            fields:
+              - name: provider
+                label: Delivery service
+                widget: select
+                default: none
+                options:
+                  - { label: "Not connected (visitors are asked to email instead)", value: none }
+                  - { label: Formspree, value: formspree }
+                  - { label: Custom endpoint, value: custom }
+              - { name: endpoint, label: Form endpoint URL, widget: string, required: false, hint: "For Formspree: https://formspree.io/f/xxxxxxx" }

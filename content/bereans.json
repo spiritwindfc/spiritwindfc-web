@@ -1,0 +1,48 @@
+{
+  "intro": "The School of Bereans is SFC's school for growing deep in God's Word. Like the believers in Berea, students receive the Word with eagerness and search the Scriptures daily, growing level by level into mature, discerning followers of Jesus.",
+  "verse": {
+    "text": "These were more noble than those in Thessalonica, in that they received the word with all readiness of mind, and searched the scriptures daily, whether those things were so.",
+    "ref": "Acts 17:11 · KJV"
+  },
+  "theme": "Bereans Anchored in the Word, Crowned with Wisdom, Called to Impact Generations",
+  "poster": "/assets/img/sob-graduation-poster.webp",
+  "milestone": {
+    "title": "1st Graduation Rites & Awards Ceremony",
+    "date": "April 26, 2026",
+    "note": "First batch of Berean graduates"
+  },
+  "latest": {
+    "title": "3rd Recognition & Moving-Up Ceremony",
+    "date": "September 6, 2026"
+  },
+  "hashtag": "#BastaBereanKugihan",
+  "schedule": "",
+  "enroll": "",
+  "levels": [
+    {
+      "name": "Lamb",
+      "logo": "/assets/img/sob-level-lamb.webp",
+      "text": ""
+    },
+    {
+      "name": "Sheep",
+      "logo": "/assets/img/sob-level-sheep.webp",
+      "text": ""
+    },
+    {
+      "name": "Dove",
+      "logo": "/assets/img/sob-level-dove.webp",
+      "text": ""
+    },
+    {
+      "name": "Eagle",
+      "logo": "/assets/img/sob-level-eagle.webp",
+      "text": ""
+    },
+    {
+      "name": "Lion",
+      "logo": "/assets/img/sob-level-lion.webp",
+      "text": ""
+    }
+  ]
+}

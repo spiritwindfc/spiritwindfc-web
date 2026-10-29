@@ -1,0 +1,49 @@
+{
+  "sermons": [
+    {
+      "title": "Come broken, but be willing to be rebuilt.",
+      "image": "/assets/img/sermon-come-broken.webp",
+      "speaker": "",
+      "scripture": "",
+      "date": "",
+      "url": "https://www.facebook.com/spiritwindfellowshipchurch/videos",
+      "featured": true
+    },
+    {
+      "title": "Worship has little meaning if it requires no effort, no sacrifice, no surrender.",
+      "image": "/assets/img/sermon-worship-effort.webp",
+      "speaker": "",
+      "scripture": "",
+      "date": "",
+      "url": "https://www.facebook.com/spiritwindfellowshipchurch/videos",
+      "featured": false
+    },
+    {
+      "title": "Your worship can change you, your situation, and the lives of those around you.",
+      "image": "/assets/img/sermon-worship-change.webp",
+      "speaker": "",
+      "scripture": "",
+      "date": "",
+      "url": "https://www.facebook.com/spiritwindfellowshipchurch/videos",
+      "featured": false
+    },
+    {
+      "title": "When pride comes, then comes disgrace, but with humility comes wisdom.",
+      "image": "/assets/img/sermon-humility.webp",
+      "speaker": "",
+      "scripture": "Proverbs 11:2",
+      "date": "",
+      "url": "https://www.facebook.com/spiritwindfellowshipchurch/videos",
+      "featured": false
+    },
+    {
+      "title": "Dili jud i-reject ni Lord ang mga magpadayon og duol Kaniya.",
+      "image": "/assets/img/sermon-bisaya.webp",
+      "speaker": "",
+      "scripture": "",
+      "date": "",
+      "url": "https://www.facebook.com/spiritwindfellowshipchurch/videos",
+      "featured": false
+    }
+  ]
+}

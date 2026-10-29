@@ -1,0 +1,112 @@
+{
+  "hero": {
+    "image": "/assets/img/photo-worship-stage-wide.webp",
+    "line1": "Loving God.",
+    "line2": "Loving People.",
+    "sub": "One faith. One family. All for Jesus. Come worship with us this Sunday.",
+    "verse": {
+      "text": "The wind bloweth where it listeth… so is every one that is born of the Spirit.",
+      "ref": "John 3:8 · KJV"
+    }
+  },
+  "welcome": {
+    "text": "Spiritwind Fellowship Church gathers every Sunday for worship, fellowship and the living Word of God. Whether you're exploring faith or looking for a church home, there's a seat for you.",
+    "points": [
+      {
+        "title": "Worship",
+        "text": "led by our worship team, every Sunday Celebration."
+      },
+      {
+        "title": "The Word",
+        "text": "preached plainly, so it guides your week."
+      },
+      {
+        "title": "Fellowship",
+        "text": "with a family that's all for Jesus."
+      }
+    ],
+    "quote": {
+      "text": "Dili jud i-reject ni Lord ang mga magpadayon og duol Kaniya.",
+      "note": "From a recent SFC sermon — the Lord will never turn away those who keep drawing near to Him."
+    },
+    "photoMain": {
+      "image": "/assets/img/photo-worship-congregation.webp",
+      "alt": "The congregation worshiping with hands raised at Sunday Celebration"
+    },
+    "photoTop": {
+      "image": "/assets/img/photo-fellowship-friends.webp",
+      "alt": "Two church members smiling together after the service"
+    },
+    "photoBottom": {
+      "image": "/assets/img/photo-fellowship-family.webp",
+      "alt": "Church family greeting one another, a young family with their little one"
+    }
+  },
+  "worship": {
+    "image": "/assets/img/photo-worship-band.webp",
+    "text": "Sunday Celebration is a day of praise, prayer and the preaching of God's Word, followed by time to meet the family."
+  },
+  "pillars": [
+    {
+      "icon": "heart",
+      "title": "Our Vision",
+      "highlight": "Loving God. Loving People.",
+      "summary": "The heart of SFC in four words, as the church describes itself.",
+      "body": "“Loving God. Loving People.” is how Spiritwind Fellowship Church introduces itself. Everything we do flows from these two great commandments.\n\nThou shalt love the Lord thy God with all thy heart… Thou shalt love thy neighbour as thyself. (Matthew 22:37, 39, KJV)"
+    },
+    {
+      "icon": "compass",
+      "title": "Our Mission",
+      "highlight": "",
+      "summary": "Our mission statement is coming soon.",
+      "body": "Our mission statement will be shared here soon."
+    },
+    {
+      "icon": "book",
+      "title": "What We Believe",
+      "highlight": "",
+      "summary": "Our statement of faith is coming soon.",
+      "body": "We're a Christian church centered on Jesus Christ. Our full statement of faith will be shared here soon."
+    }
+  ],
+  "verses": [
+    {
+      "text": "Thou shalt love the Lord thy God with all thy heart, and with all thy soul, and with all thy mind… Thou shalt love thy neighbour as thyself.",
+      "ref": "Matthew 22:37, 39 · KJV"
+    },
+    {
+      "text": "The wind bloweth where it listeth, and thou hearest the sound thereof… so is every one that is born of the Spirit.",
+      "ref": "John 3:8 · KJV"
+    },
+    {
+      "text": "And suddenly there came a sound from heaven as of a rushing mighty wind, and it filled all the house where they were sitting.",
+      "ref": "Acts 2:2 · KJV"
+    },
+    {
+      "text": "Draw nigh to God, and he will draw nigh to you.",
+      "ref": "James 4:8 · KJV"
+    }
+  ],
+  "visit": {
+    "steps": [
+      {
+        "title": "Head to the CMS Building",
+        "text": "We meet on the 4th floor of the CMS Building along National Highway."
+      },
+      {
+        "title": "Arrive a little before 9:00 AM",
+        "text": "Sunday Celebration starts at 9:00. Coming early gives you time to find a seat."
+      },
+      {
+        "title": "Worship, Word and fellowship",
+        "text": "Praise and worship, a message from the Bible, then time to meet the family."
+      },
+      {
+        "title": "Say hello",
+        "text": "Let us know you're new. We'd love to pray with you and answer any questions."
+      }
+    ],
+    "kids": "",
+    "parking": ""
+  }
+}

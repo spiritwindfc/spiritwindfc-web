@@ -1,0 +1,11 @@
+{
+  "ministries": [
+    {
+      "name": "Sunday Worship",
+      "image": "/assets/img/photo-worship-team-praise.webp",
+      "text": "The worship team leads the church in praise every Sunday Celebration.",
+      "when": "Every Sunday",
+      "link": "#worship"
+    }
+  ]
+}

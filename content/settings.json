@@ -1,0 +1,32 @@
+{
+  "name": "Spiritwind Fellowship Church",
+  "short": "SFC",
+  "tagline": "Loving God. Loving People.",
+  "motto": "One faith. One family. All for Jesus.",
+  "followers": "3.3K",
+  "address": "4th Floor CMS Building, National Highway, 8100",
+  "addressShort": "4th Floor, CMS Building",
+  "addressLine2": "National Highway, 8100",
+  "mapsUrl": "https://www.google.com/maps/search/?api=1&query=CMS+Building+National+Highway+8100",
+  "email": "spiritwindfellowshipchurch@gmail.com",
+  "phone": "",
+  "social": {
+    "facebook": "https://www.facebook.com/spiritwindfellowshipchurch",
+    "instagram": "https://www.instagram.com/spiritwindfc",
+    "tiktok": "https://www.tiktok.com/@spiritwindfc",
+    "youtube": "https://www.youtube.com/@SpiritwindFellowshipChurch"
+  },
+  "services": [
+    {
+      "day": "Sunday",
+      "time": "9:00",
+      "ampm": "AM",
+      "name": "Sunday Celebration",
+      "note": "SFC Worship Hub · worship, Word and fellowship"
+    }
+  ],
+  "form": {
+    "provider": "none",
+    "endpoint": ""
+  }
+}

@@ -1,5 +1,6 @@
 /* Spiritwind Fellowship Church — site behaviour (rendering, motion, forms).
-   Content lives in content.js; you normally don't need to edit this file. */
+   All church content lives in content/*.json and is edited through the admin
+   page at /admin (Sveltia CMS). You normally don't need to edit this file. */
 /* ---------- helpers ---------- */
 const $ = (s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -26,7 +27,7 @@ const ICON = {
 };
 const DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const todo = (t="To confirm", cls="") => `<span class="todo ${cls}">${esc(t)}</span>`;
+const todo = (t="Coming soon", cls="") => `<span class="todo ${cls}">${esc(t)}</span>`;
 function toast(msg){const t=$("#toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),2200);}
 async function copy(text){try{await navigator.clipboard.writeText(text); toast("Copied: "+text);}catch(e){toast("Select the text and copy it manually");}}
 
@@ -39,11 +40,23 @@ function nextService(svc){
   const dt=new Date(base); dt.setUTCDate(base.getUTCDate()+add); return {date:dt, today:add===0};
 }
 
-/* ---------- images ---------- */
-function applyImages(){
-  $$("[data-img]").forEach(el=>{const k=el.dataset.img; if(IMG[k]) el.src=IMG[k];});
-  $$("[data-bg]").forEach(el=>{const k=el.dataset.bg; if(IMG[k]) el.style.backgroundImage=`url("${IMG[k]}")`;});
+/* ---------- content ---------- */
+const CONTENT_FILES=["settings","home","bereans","events","ministries","sermons","gallery"];
+let SITE=null;
+async function loadContent(){
+  const parts=await Promise.all(CONTENT_FILES.map(f=>fetch(`content/${f}.json`,{cache:"no-cache"}).then(r=>{ if(!r.ok) throw new Error(f); return r.json(); })));
+  const [settings,home,bereans,ev,min,ser,gal]=parts;
+  SITE={...settings, home, bereans, events:ev.events||[], ministries:min.ministries||[], sermons:ser.sermons||[], gallery:gal.photos||[]};
+  // services: the admin picks a day name; the page works with 0–6
+  SITE.services=(SITE.services||[]).map(x=>({...x, day:Math.max(0,DAYS.indexOf(x.day))}));
+  if(!SITE.services.length) SITE.services=[{day:0,time:"9:00",ampm:"AM",name:"Sunday Celebration",note:""}];
 }
+/* image paths from the admin are relative to the site root ("assets/…") */
+const src = p => p ? String(p).trim().replace(/^\/+/,"") : "";
+const paras = t => String(t||"").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean).map(x=>`<p>${esc(x).replace(/\n/g,"<br>")}</p>`).join("");
+const has = v => v!=null && String(v).trim()!=="";
+function setImg(el,path,alt){ if(!el||!has(path)) return; el.src=src(path); if(alt!=null) el.alt=alt; }
+function setBg(el,path){ if(el&&has(path)) el.style.backgroundImage=`url("${src(path)}")`; }
 
 /* ---------- render ---------- */
 const NAV=[["Home","#home"],["About Us","#about"],["Ministries","#ministries"],["Bereans","#bereans"],["Sermons","#sermons"],["Events","#events"],["Contact","#contact"]];
@@ -51,9 +64,26 @@ function render(){
   $("#navLinks").innerHTML=NAV.map(([t,h])=>`<li><a href="${h}">${t}</a></li>`).join("");
   $("#drawerLinks").innerHTML=NAV.map(([t,h])=>`<a href="${h}" data-close>${t}</a>`).join("");
   $("#footLinks").innerHTML=NAV.concat([["Plan Your Visit","#visit"]]).map(([t,h])=>`<li><a href="${h}">${t}</a></li>`).join("");
-  $("#heroSub").textContent=SITE.motto+" Come worship with us this Sunday.";
-  $("#followers").textContent=SITE.followers;
-  const s0=SITE.services[0]; $("#heroTime").textContent=`${s0.time} ${s0.ampm}`;
+  const H=SITE.home||{}, hero=H.hero||{}, W=H.welcome||{};
+  const s0=SITE.services[0];
+  // hero
+  setBg($("#heroPhoto"),hero.image);
+  if(has(hero.line1)) $("#heroLine1").textContent=hero.line1;
+  if(has(hero.line2)) $("#heroLine2").textContent=hero.line2;
+  if(has(hero.sub)) $("#heroSub").textContent=hero.sub;
+  if(hero.verse&&has(hero.verse.text)) $("#heroVerse").innerHTML=`“${esc(hero.verse.text)}”<b>${esc(hero.verse.ref||"")}</b>`;
+  $("#heroSvc").textContent=s0.name; $("#heroTime").textContent=`${s0.time} ${s0.ampm}`;
+  if(has(SITE.addressShort)) $("#heroPlace").textContent=SITE.addressShort;
+  // welcome
+  $("#followers").textContent=SITE.followers||"";
+  $(".welcome .badge").hidden=!has(SITE.followers);
+  [W.photoMain,W.photoTop,W.photoBottom].forEach((ph,i)=>{ if(ph) setImg($("#welcomePhoto"+(i+1)),ph.image,ph.alt||""); });
+  if(has(W.text)) $("#welcomeText").textContent=W.text;
+  const CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+  if(Array.isArray(W.points)) $("#welcomePoints").innerHTML=W.points.map(x=>`<li>${CHECK}<span><b>${esc(x.title)}</b> ${esc(x.text||"")}</span></li>`).join("");
+  if(W.quote&&has(W.quote.text)) $("#welcomeQuote").innerHTML=`“${esc(W.quote.text)}”${has(W.quote.note)?`<small>${esc(W.quote.note)}</small>`:""}`; else $("#welcomeQuote").hidden=true;
+  // worship
+  if(H.worship){ setBg($("#worshipPhoto"),H.worship.image); if(has(H.worship.text)) $("#worshipText").textContent=H.worship.text; }
 
   // services
   const nx=nextService(s0);
@@ -63,16 +93,17 @@ function render(){
    +`<div class="actions"><a class="btn btn-primary" href="#visit">First time? Start here</a><a class="btn btn-ghost" href="${SITE.mapsUrl}" target="_blank" rel="noopener">Get directions</a></div>`;
 
   // pillars
-  const pic={vision:ICON.heart,mission:ICON.compass,beliefs:ICON.book};
+  SITE.pillars=H.pillars||[];
   $("#pillars").innerHTML=SITE.pillars.map((p,i)=>`<button class="pillar rv" data-pillar="${i}" aria-haspopup="dialog">
-     <span class="ico">${pic[p.key]||ICON.flame}</span><h3>${esc(p.title)}</h3>
-     ${p.big?`<span class="big">${esc(p.big)}</span>`:todo("Awaiting church content")}
-     <p>${esc(p.text)}</p><span class="more">Read more ${ICON.arrow}</span></button>`).join("");
+     <span class="ico">${ICON[p.icon]||ICON.flame}</span><h3>${esc(p.title)}</h3>
+     ${has(p.highlight)?`<span class="big">${esc(p.highlight)}</span>`:todo()}
+     <p>${esc(p.summary||"")}</p><span class="more">Read more ${ICON.arrow}</span></button>`).join("");
 
   // ministries
-  $("#ministryGrid").innerHTML=SITE.ministries.map(m=> m.status==="todo"
-   ? `<article class="mcard placeholder rv"><div class="ph">${ICON.plus}</div><div class="body">${todo("Placeholder")}<h3>${esc(m.name)}</h3><p>${esc(m.text)}</p></div></article>`
-   : `<article class="mcard rv"><div class="ph"><img src="${IMG[m.img]||""}" alt="${esc(m.name)}" loading="lazy"></div><div class="body"><h3>${esc(m.name)}</h3><p>${esc(m.text)}</p><div class="foot"><a href="${esc(m.link||"#contact")}">Learn more →</a><span class="chip">Every Sunday</span></div></div></article>`).join("");
+  const mcard=m=>`<article class="mcard rv"><div class="ph">${has(m.image)?`<img src="${esc(src(m.image))}" alt="${esc(m.name)}" loading="lazy">`:""}</div><div class="body"><h3>${esc(m.name)}</h3><p>${esc(m.text||"")}</p><div class="foot"><a href="${esc(has(m.link)?m.link:"#contact")}"${/^https?:/.test(m.link||"")?' target="_blank" rel="noopener"':''} data-inquiry="ministry">Learn more →</a>${has(m.when)?`<span class="chip">${esc(m.when)}</span>`:""}</div></div></article>`;
+  const soon=`<article class="mcard placeholder rv"><div class="ph">${ICON.plus}</div><div class="body">${todo()}<h3>More ministries</h3><p>More ways to serve and grow together will be listed here. Ask us how you can get involved.</p></div></article>`;
+  const ms=SITE.ministries.map(mcard); while(ms.length<3) ms.push(soon);
+  $("#ministryGrid").innerHTML=ms.join("");
 
   // school of bereans
   renderBereans();
@@ -80,72 +111,81 @@ function render(){
   // sermons
   $("#moreSermons").href=SITE.social.youtube;
   const fs=SITE.sermons.find(x=>x.featured)||SITE.sermons[0];
-  const meta=s=>`<div class="smeta"><span>${ICON.user}${s.speaker?esc(s.speaker):todo("Speaker","stodo")}</span><span>${ICON.book}${s.scripture?esc(s.scripture):todo("Scripture","stodo")}</span><span>${ICON.cal}${s.date?esc(s.date):todo("Date","stodo")}</span></div>`;
-  $("#featSermon").innerHTML=`<a class="thumb" href="${esc(fs.url)}" target="_blank" rel="noopener" aria-label="Watch on Facebook"><img src="${IMG[fs.img]}" alt="Sermon graphic: ${esc(fs.title)}"><span class="play">${ICON.play}</span></a>
-    <div><span class="label">Featured message</span><h3>“${esc(fs.title)}”</h3>${meta(fs)}<a class="btn btn-primary" href="${esc(fs.url)}" target="_blank" rel="noopener">Watch on Facebook ${ICON.out}</a></div>`;
-  $("#sermonList").innerHTML=SITE.sermons.filter(x=>x!==fs).map(s=>`<a class="sitem rv" href="${esc(s.url)}" target="_blank" rel="noopener"><img src="${IMG[s.img]}" alt=""><span><b>${esc(s.title)}</b><small>${s.scripture?esc(s.scripture)+" · ":""}Sermon highlight · Facebook</small></span><span class="arr">${ICON.out}</span></a>`).join("");
+  const sdate=d=>/^\d{4}-\d{2}-\d{2}/.test(d||"")?fmtDate(d.slice(0,10)):esc(d);
+  const where=u=>/youtu/.test(u||"")?"YouTube":/facebook|fb\.watch/.test(u||"")?"Facebook":"online";
+  const meta=s=>{const bits=[has(s.speaker)?`<span>${ICON.user}${esc(s.speaker)}</span>`:"",has(s.scripture)?`<span>${ICON.book}${esc(s.scripture)}</span>`:"",has(s.date)?`<span>${ICON.cal}${sdate(s.date)}</span>`:""].join(""); return bits?`<div class="smeta">${bits}</div>`:"";};
+  if(fs){
+    $("#featSermon").innerHTML=`<a class="thumb" href="${esc(fs.url)}" target="_blank" rel="noopener" aria-label="Watch on ${where(fs.url)}"><img src="${esc(src(fs.image))}" alt="Sermon graphic: ${esc(fs.title)}"><span class="play">${ICON.play}</span></a>
+      <div><span class="label">Featured message</span><h3>“${esc(fs.title)}”</h3>${meta(fs)}<a class="btn btn-primary" href="${esc(fs.url)}" target="_blank" rel="noopener">Watch on ${where(fs.url)} ${ICON.out}</a></div>`;
+    $("#sermonList").innerHTML=SITE.sermons.filter(x=>x!==fs).map(s=>`<a class="sitem rv" href="${esc(s.url)}" target="_blank" rel="noopener"><img src="${esc(src(s.image))}" alt=""><span><b>${esc(s.title)}</b><small>${[has(s.speaker)?esc(s.speaker):"",has(s.scripture)?esc(s.scripture):"",has(s.date)?sdate(s.date):""].filter(Boolean).join(" · ")||"Sermon highlight"} · ${where(s.url)}</small></span><span class="arr">${ICON.out}</span></a>`).join("");
+  } else $("#sermons").hidden=true;
 
   // events
   const n=manilaNow(), todayStr=`${n.y}-${String(n.m).padStart(2,"0")}-${String(n.d).padStart(2,"0")}`;
-  const upcoming=SITE.events.filter(e=>e.date>=todayStr).sort((a,b)=>a.date.localeCompare(b.date));
+  const upcoming=SITE.events.map(e=>({...e,date:String(e.date||"").slice(0,10)})).filter(e=>/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&e.date>=todayStr).sort((a,b)=>a.date.localeCompare(b.date));
   const d=nx.date;
   const feat = upcoming[0];
   const featHTML = feat ? eventFeat(feat) : `<article class="efeat rv"><div class="when"><div class="cal"><small>${MON[d.getUTCMonth()]}</small><b>${d.getUTCDate()}</b></div><div><div class="tag">${nx.today?"Today":"This coming Sunday"} · weekly</div><h3>${esc(s0.name)}</h3></div></div>
      <p>${esc(SITE.motto)} Join the SFC family for worship, fellowship and the living Word of God.</p>
-     <div class="facts"><span>${ICON.clock}${esc(s0.time)} ${esc(s0.ampm)}</span><span>${ICON.pin}4th Floor, CMS Building</span></div>
+     <div class="facts"><span>${ICON.clock}${esc(s0.time)} ${esc(s0.ampm)}</span><span>${ICON.pin}${esc(SITE.addressShort||SITE.address)}</span></div>
      <button class="btn" data-event="weekly">Event details ${ICON.arrow}</button></article>`;
   const rest = upcoming.slice(feat?1:0);
-  const side = rest.length ? `<div class="slist">${rest.map((e,i)=>`<button class="sitem rv" style="color:inherit;text-align:left;border:0;font:inherit;cursor:pointer;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)" data-event="${i+(feat?1:0)}"><img src="${IMG[e.img]||IMG.logo}" alt=""><span><b>${esc(e.title)}</b><small style="color:var(--muted)">${fmtDate(e.date)} · ${esc(e.time||"")}</small></span><span class="arr">${ICON.arrow}</span></button>`).join("")}</div>`
-     : `<div class="empty rv">${todo("No dated events yet")}<h3>Special events will show up here.</h3><p>Conferences, youth nights, outreach and celebrations appear automatically once they're added, and disappear after their date passes.</p><p style="font-size:14px">Church admin: add entries to <code>SITE.events</code> with a title, date, time, place and photo.</p><a class="btn btn-ghost" style="align-self:flex-start;color:var(--otext)" href="${SITE.social.facebook}" target="_blank" rel="noopener">Follow updates on Facebook</a></div>`;
+  const side = rest.length ? `<div class="slist">${rest.map((e,i)=>`<button class="sitem rv" style="color:inherit;text-align:left;border:0;font:inherit;cursor:pointer;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)" data-event="${i+(feat?1:0)}"><img src="${esc(src(e.image)||"assets/img/logo.webp")}" alt=""><span><b>${esc(e.title)}</b><small style="color:var(--muted)">${fmtDate(e.date)} · ${esc(e.time||"")}</small></span><span class="arr">${ICON.arrow}</span></button>`).join("")}</div>`
+     : `<div class="empty rv">${todo("No special events yet")}<h3>Special events will show up here.</h3><p>Conferences, youth nights, outreach and celebrations are announced here and on our Facebook page.</p><a class="btn btn-ghost" style="align-self:flex-start;color:var(--otext)" href="${esc(SITE.social.facebook)}" target="_blank" rel="noopener">Follow updates on Facebook</a></div>`;
   $("#eventGrid").innerHTML=featHTML+side;
   window._upcoming=upcoming;
 
   // gallery
   $("#fbPhotos").href=SITE.social.facebook+"/photos";
-  $("#galleryGrid").innerHTML=SITE.gallery.map((g,i)=>`<button class="gitem rv ${g.size||""}" data-g="${i}" aria-label="Open photo: ${esc(g.cap)}"><img src="${IMG[g.img]}" alt="${esc(g.cap)}" loading="lazy"><span>${esc(g.cap)}</span></button>`).join("");
+  SITE.gallery=SITE.gallery.filter(g=>has(g.image));
+  $("#galleryGrid").innerHTML=SITE.gallery.map((g,i)=>`<button class="gitem rv ${g.size==="tall"||g.size==="wide"?g.size:""}" data-g="${i}" aria-label="Open photo: ${esc(g.caption||"Church photo")}"><img src="${esc(src(g.image))}" alt="${esc(g.caption||"")}" loading="lazy">${has(g.caption)?`<span>${esc(g.caption)}</span>`:""}</button>`).join("");
 
   // visit
-  $("#visitSteps").innerHTML=SITE.visit.steps.map((s,i)=>`<li><span class="n">${i+1}</span><div><b>${esc(s.t)}</b><span>${esc(s.d)}</span></div></li>`).join("");
+  const VS=H.visit||{steps:[]}; SITE.visit=VS;
+  $("#visitSteps").innerHTML=(VS.steps||[]).map((s,i)=>`<li><span class="n">${i+1}</span><div><b>${esc(s.title)}</b><span>${esc(s.text||"")}</span></div></li>`).join("");
   $("#visitCards").innerHTML=`
    <div class="vcard"><span class="k">${ICON.clock}When</span><span class="v">${DAYS[s0.day]}s, ${esc(s0.time)} ${esc(s0.ampm)}</span><p>${esc(s0.name)}</p></div>
-   <div class="vcard"><span class="k">${ICON.pin}Where</span><span class="v">4th Floor, CMS Building</span><p>National Highway, 8100</p><a class="lnk" href="${SITE.mapsUrl}" target="_blank" rel="noopener">Open in Maps →</a></div>
-   <div class="vcard"><span class="k">${ICON.heart}Kids &amp; families</span>${SITE.visit.kids?`<p>${esc(SITE.visit.kids)}</p>`:`${todo()}<p>Children's arrangements will be listed here. Message us and we'll help you plan.</p>`}</div>
-   <div class="vcard"><span class="k">${ICON.compass}Getting there</span>${SITE.visit.parking?`<p>${esc(SITE.visit.parking)}</p>`:`${todo()}<p>Parking and transport tips coming soon.</p>`}</div>
+   <div class="vcard"><span class="k">${ICON.pin}Where</span><span class="v">${esc(SITE.addressShort||SITE.address)}</span><p>${esc(SITE.addressLine2||"")}</p><a class="lnk" href="${esc(SITE.mapsUrl)}" target="_blank" rel="noopener">Open in Maps →</a></div>
+   <div class="vcard"><span class="k">${ICON.heart}Kids &amp; families</span>${has(VS.kids)?`<p>${esc(VS.kids)}</p>`:`${todo()}<p>Children's arrangements will be listed here. Message us and we'll help you plan.</p>`}</div>
+   <div class="vcard"><span class="k">${ICON.compass}Getting there</span>${has(VS.parking)?`<p>${esc(VS.parking)}</p>`:`${todo()}<p>Parking and transport tips coming soon.</p>`}</div>
    <div class="vcard wide"><span class="k">${ICON.mail}Questions before you come?</span><span class="v" style="font-size:17px;overflow-wrap:anywhere">${esc(SITE.email)}</span><p>Or message SFC on Facebook. We're happy to help.</p></div>`;
 
   // contact
   $("#contactList").innerHTML=`
-   <div class="citem"><span class="ic">${ICON.pin}</span><div><small>Address</small><b>${esc(SITE.address)}</b></div><a class="go" href="${SITE.mapsUrl}" target="_blank" rel="noopener">Map</a></div>
+   <div class="citem"><span class="ic">${ICON.pin}</span><div><small>Address</small><b>${esc(SITE.address)}</b></div><a class="go" href="${esc(SITE.mapsUrl)}" target="_blank" rel="noopener">Map</a></div>
    <div class="citem"><span class="ic">${ICON.mail}</span><div><small>Email</small><b>${esc(SITE.email)}</b></div><button class="cp" data-copy="${esc(SITE.email)}">Copy</button></div>
-   <div class="citem"><span class="ic">${ICON.phone}</span><div><small>Phone</small>${SITE.phone?`<b>${esc(SITE.phone)}</b>`:`<b style="font-weight:500;color:var(--muted)">Not published yet</b>`}</div>${SITE.phone?`<button class="cp" data-copy="${esc(SITE.phone)}">Copy</button>`:""}</div>
-   <div class="citem"><span class="ic">${ICON.fb}</span><div><small>Facebook</small><b>facebook.com/spiritwindfellowshipchurch</b></div><a class="go" href="${SITE.social.facebook}" target="_blank" rel="noopener">Open</a></div>`;
+   <div class="citem"><span class="ic">${ICON.phone}</span><div><small>Phone</small>${has(SITE.phone)?`<b>${esc(SITE.phone)}</b>`:`<b style="font-weight:500;color:var(--muted)">Not published yet</b>`}</div>${has(SITE.phone)?`<button class="cp" data-copy="${esc(SITE.phone)}">Copy</button>`:""}</div>
+   <div class="citem"><span class="ic">${ICON.fb}</span><div><small>Facebook</small><b>${esc(String(SITE.social.facebook||"").replace(/^https?:\/\/(www\.)?/,"").replace(/\/$/,""))}</b></div><a class="go" href="${esc(SITE.social.facebook)}" target="_blank" rel="noopener">Open</a></div>`;
   $("#f-topic").innerHTML=["General question","Planning a visit","Prayer request","Joining a ministry","School of Bereans","Something else"].map((t,i)=>`<option value="${["general","visit","prayer","ministry","bereans","other"][i]}">${t}</option>`).join("");
 
   // footer
   const so=SITE.social;
-  $("#socials").innerHTML=[["Facebook",so.facebook,ICON.fb],["Instagram",so.instagram,ICON.ig],["TikTok",so.tiktok,ICON.tt],["YouTube",so.youtube,ICON.yt]].map(([n,u,i])=>`<a href="${u}" target="_blank" rel="noopener" aria-label="${n}">${i}</a>`).join("");
-  $("#footSvc").innerHTML=SITE.services.map(s=>`<li style="color:var(--stage-muted)">${DAYS[s.day]} · ${esc(s.time)} ${esc(s.ampm)}<br><span style="color:var(--stage-ink)">${esc(s.name)}</span></li>`).join("")+`<li style="color:var(--stage-muted)">4th Floor, CMS Building<br>National Highway, 8100</li>`;
+  $("#socials").innerHTML=[["Facebook",so.facebook,ICON.fb],["Instagram",so.instagram,ICON.ig],["TikTok",so.tiktok,ICON.tt],["YouTube",so.youtube,ICON.yt]].filter(([,u])=>has(u)).map(([n,u,i])=>`<a href="${esc(u)}" target="_blank" rel="noopener" aria-label="${n}">${i}</a>`).join("");
+  $("#footSvc").innerHTML=SITE.services.map(s=>`<li style="color:var(--stage-muted)">${DAYS[s.day]} · ${esc(s.time)} ${esc(s.ampm)}<br><span style="color:var(--stage-ink)">${esc(s.name)}</span></li>`).join("")+`<li style="color:var(--stage-muted)">${esc(SITE.addressShort||SITE.address)}${has(SITE.addressLine2)?"<br>"+esc(SITE.addressLine2):""}</li>`;
   $("#footContact").innerHTML=`<li style="color:var(--stage-muted);overflow-wrap:anywhere;user-select:all">${esc(SITE.email)}</li><li><a href="${so.facebook}" target="_blank" rel="noopener">Message us on Facebook</a></li><li><a href="#contact">Send a message</a></li>`;
   $("#yr").textContent=new Date().getFullYear();
 }
 function renderBereans(){
   const B=SITE.bereans; if(!B){ $("#bereans")?.remove(); return; }
   $("#sobIntro").textContent=B.intro;
-  $("#sobVerse").innerHTML=`<p>${esc(B.verse.t)}</p><cite>${esc(B.verse.r)}</cite>`;
-  const extra=[B.schedule?`${ICON.clock} ${esc(B.schedule)}`:"", B.hashtag?esc(B.hashtag):""].filter(Boolean).join(" · ");
+  $("#sobVerse").innerHTML=`<p>${esc(B.verse?.text||"")}</p><cite>${esc(B.verse?.ref||"")}</cite>`;
+  const extra=[has(B.schedule)?`${ICON.clock} ${esc(B.schedule)}`:"", has(B.hashtag)?esc(B.hashtag):""].filter(Boolean).join(" · ");
   $("#sobTag").innerHTML=extra;
-  if(IMG.sobPoster) $("#sobPoster").src=IMG.sobPoster;
-  $("#sobMilestone").innerHTML=`<span class="cap-ic">${ICON.cal}</span><span><b>${esc(B.milestone.title)}</b>${esc(B.milestone.date)} · First batch of Berean graduates</span>`;
+  setImg($("#sobPoster"),B.poster);
+  const ms=B.milestone||{};
+  $("#sobMilestone").innerHTML=has(ms.title)?`<span class="cap-ic">${ICON.cal}</span><span><b>${esc(ms.title)}</b>${esc(ms.date||"")}${has(ms.note)?" · "+esc(ms.note):""}</span>`:"";
+  $("#sobMilestone").hidden=!has(ms.title);
+  const enrollLink=$('#bereans [data-inquiry="bereans"]'); if(enrollLink&&/^https?:/.test(B.enroll||"")){ enrollLink.href=B.enroll; enrollLink.target="_blank"; enrollLink.rel="noopener"; enrollLink.removeAttribute("data-inquiry"); }
   const n=B.levels.length;
-  $("#sobLevels").innerHTML=B.levels.map((l,i)=>{const fin=i===n-1, src=IMG[l.logo];
+  $("#sobLevels").innerHTML=B.levels.map((l,i)=>{const fin=i===n-1, logo=src(l.logo);
     return `<li class="lvl rv${fin?" final":""}">
-      <span class="medal">${src?`<img src="${src}" alt="${esc(l.name)} level logo" width="72" height="72">`:""}<b aria-hidden="true">${i+1}</b></span>
+      <span class="medal">${logo?`<img src="${esc(logo)}" alt="${esc(l.name)} level logo" width="72" height="72">`:""}<b aria-hidden="true">${i+1}</b></span>
       <small>Level ${i+1} of ${n}</small>
       <h4>${esc(l.name)}</h4>
-      ${l.text?`<p>${esc(l.text)}</p>`:`<span class="soon">Level details coming soon</span>`}
+      ${has(l.text)?`<p>${esc(l.text)}</p>`:`<span class="soon">Level details coming soon</span>`}
       ${fin?`<span class="badge-final">Final level</span>`:""}
     </li>`}).join("");
-  $("#sobLatest").innerHTML=B.latest?`${ICON.cal}<span>Latest: <b>${esc(B.latest.title)}</b> · ${esc(B.latest.date)}</span>`:"";
+  $("#sobLatest").innerHTML=has(B.latest?.title)?`${ICON.cal}<span>Latest: <b>${esc(B.latest.title)}</b> · ${esc(B.latest.date||"")}</span>`:"";
 }
 function fmtDate(s){const [y,m,d]=s.split("-").map(Number); return `${MON[m-1]} ${d}, ${y}`;}
 function eventFeat(e){const [y,m,d]=e.date.split("-").map(Number);
@@ -153,27 +193,24 @@ function eventFeat(e){const [y,m,d]=e.date.split("-").map(Number);
 
 /* ---------- dialogs ---------- */
 const dlg=$("#dlg");
-function openModal(html){ $("#dlgBody").innerHTML=`<button class="x" data-dclose aria-label="Close">×</button>`+html; dlg.showModal?dlg.showModal():dlg.setAttribute("open",""); }
+function openModal(html){ $("#dlgBody").innerHTML=`<button class="x" data-dclose aria-label="Close">×</button>`+html; dlg.showModal?dlg.showModal():dlg.setAttribute("open",""); lockScroll(true); }
+dlg.addEventListener("close",()=>lockScroll(false));
 dlg.addEventListener("click",e=>{ if(e.target===dlg||e.target.closest("[data-dclose]")) dlg.close(); });
 document.addEventListener("click",e=>{
-  const p=e.target.closest("[data-pillar]"); if(p){const x=SITE.pillars[+p.dataset.pillar]; openModal(`<span class="eyebrow">About SFC</span><h3>${esc(x.title)}</h3>${x.full.join("")}`); return;}
+  const p=e.target.closest("[data-pillar]"); if(p){const x=SITE.pillars[+p.dataset.pillar]; openModal(`<span class="eyebrow">About SFC</span><h3>${esc(x.title)}</h3>${paras(x.body)||`<p>${esc(x.summary||"")}</p>`}`); return;}
   const ev=e.target.closest("[data-event]"); if(ev){
     if(ev.dataset.event==="weekly"){const s=SITE.services[0], nx=nextService(s);
-      openModal(`<span class="eyebrow">Every ${DAYS[s.day]}</span><h3>${esc(s.name)}</h3><p>${esc(SITE.motto)} A day filled with worship, fellowship and the living Word of God.</p><ul><li><b>Time:</b> ${esc(s.time)} ${esc(s.ampm)}</li><li><b>Next:</b> ${DAYS[nx.date.getUTCDay()]}, ${MON[nx.date.getUTCMonth()]} ${nx.date.getUTCDate()}, ${nx.date.getUTCFullYear()}</li><li><b>Where:</b> ${esc(SITE.address)}</li></ul><p><a class="btn btn-primary" href="${SITE.mapsUrl}" target="_blank" rel="noopener">Get directions</a></p>`);}
-    else {const x=window._upcoming[+ev.dataset.event]; openModal(`<span class="eyebrow">${fmtDate(x.date)}</span><h3>${esc(x.title)}</h3><p>${esc(x.text||"")}</p><ul><li><b>Time:</b> ${esc(x.time||"")}</li><li><b>Where:</b> ${esc(x.location||"")}</li></ul>${x.url?`<p><a class="btn btn-primary" href="${esc(x.url)}" target="_blank" rel="noopener">More info</a></p>`:""}`);}
+      openModal(`<span class="eyebrow">Every ${DAYS[s.day]}</span><h3>${esc(s.name)}</h3><p>${esc(SITE.motto)} A day filled with worship, fellowship and the living Word of God.</p><ul><li><b>Time:</b> ${esc(s.time)} ${esc(s.ampm)}</li><li><b>Next:</b> ${DAYS[nx.date.getUTCDay()]}, ${MON[nx.date.getUTCMonth()]} ${nx.date.getUTCDate()}, ${nx.date.getUTCFullYear()}</li><li><b>Where:</b> ${esc(SITE.address)}</li></ul><p><a class="btn btn-primary" href="${esc(SITE.mapsUrl)}" target="_blank" rel="noopener">Get directions</a></p>`);}
+    else {const x=window._upcoming[+ev.dataset.event]; openModal(`<span class="eyebrow">${fmtDate(x.date)}</span>${has(x.image)?`<img src="${esc(src(x.image))}" alt="" style="width:100%;border-radius:16px;margin:14px 0 4px;max-height:260px;object-fit:cover">`:""}<h3>${esc(x.title)}</h3>${paras(x.text)}<ul><li><b>Time:</b> ${esc(x.time||"")}</li><li><b>Where:</b> ${esc(x.location||"")}</li></ul>${x.url?`<p><a class="btn btn-primary" href="${esc(x.url)}" target="_blank" rel="noopener">More info</a></p>`:""}`);}
     return;}
   const c=e.target.closest("[data-copy]"); if(c){copy(c.dataset.copy); return;}
   const q=e.target.closest("[data-inquiry]"); if(q){$("#f-topic").value=q.dataset.inquiry;}
 });
-$("#openChecklist").addEventListener("click",()=>openModal(`<span class="eyebrow">For the church admin</span><h3>Content checklist</h3>
- <p>Everything marked <span class="tf">To confirm</span> on the site is waiting for details from the church. Edit <code>assets/js/content.js</code>.</p>
- <p class="vf">Verified from Facebook</p><ul><li>Name, logo and cover image</li><li>“Loving God. Loving People.” and “One faith. One family. All for Jesus.”</li><li>Sunday Celebration, 9:00 AM (from the cover image)</li><li>Address, email, Instagram, TikTok and YouTube names</li><li>Sermon graphics and worship photos</li><li>School of Bereans: the five levels and their logos, Acts 17:11, the April 26, 2026 graduation and the September 6, 2026 Moving-Up Ceremony</li></ul>
- <p class="tf">Still needed</p><ul><li>Mission statement and statement of faith</li><li>Pastors and leadership</li><li>Ministries with photos and contacts</li><li>Sermon titles, speakers, Scripture and dates</li><li>Upcoming dated events</li><li>School of Bereans: a short description of each level, class schedule and how to enroll</li><li>Phone number, city name, children's and parking info</li><li>Exact YouTube channel link</li><li>A form service for the contact form, and a privacy policy</li><li>Larger original photos (the current ones are small Facebook thumbnails)</li></ul>`));
-
 /* ---------- lightbox ---------- */
 const lbx=$("#lbx"); let gi=0;
-function showG(i){gi=(i+SITE.gallery.length)%SITE.gallery.length; const g=SITE.gallery[gi]; $("#lbImg").src=IMG[g.img]; $("#lbImg").alt=g.cap; $("#lbCap").textContent=g.cap; $("#lbCount").textContent=`${gi+1} / ${SITE.gallery.length}`;}
-$("#galleryGrid").addEventListener("click",e=>{const b=e.target.closest("[data-g]"); if(!b)return; showG(+b.dataset.g); lbx.showModal?lbx.showModal():lbx.setAttribute("open","");});
+function showG(i){gi=(i+SITE.gallery.length)%SITE.gallery.length; const g=SITE.gallery[gi]; $("#lbImg").src=src(g.image); $("#lbImg").alt=g.caption||""; $("#lbCap").textContent=g.caption||""; $("#lbCount").textContent=`${gi+1} / ${SITE.gallery.length}`;}
+$("#galleryGrid").addEventListener("click",e=>{const b=e.target.closest("[data-g]"); if(!b)return; showG(+b.dataset.g); lbx.showModal?lbx.showModal():lbx.setAttribute("open",""); lockScroll(true);});
+lbx.addEventListener("close",()=>lockScroll(false));
 $("#lbPrev").onclick=()=>showG(gi-1); $("#lbNext").onclick=()=>showG(gi+1); $("#lbClose").onclick=()=>lbx.close();
 lbx.addEventListener("click",e=>{if(e.target===lbx)lbx.close();});
 lbx.addEventListener("keydown",e=>{if(e.key==="ArrowLeft")showG(gi-1); if(e.key==="ArrowRight")showG(gi+1);});
@@ -182,16 +219,15 @@ lbx.addEventListener("touchend",e=>{if(tx==null)return; const dx=e.changedTouche
 
 /* ---------- verses ---------- */
 let vi=0, vtimer;
-function showV(i,instant){vi=(i+SITE.verses.length)%SITE.verses.length; const t=$("#vText"), r=$("#vRef");
-  const set=()=>{t.textContent="“"+SITE.verses[vi].t+"”"; r.textContent=SITE.verses[vi].r+" · KJV"; t.classList.remove("out"); r.classList.remove("out"); $$("#vDots i").forEach((d,k)=>d.classList.toggle("on",k===vi));};
+function showV(i,instant){ if(!SITE.verses.length) return; vi=(i+SITE.verses.length)%SITE.verses.length; const t=$("#vText"), r=$("#vRef");
+  const set=()=>{t.textContent="“"+SITE.verses[vi].text+"”"; r.textContent=SITE.verses[vi].ref||""; t.classList.remove("out"); r.classList.remove("out"); $$("#vDots i").forEach((d,k)=>d.classList.toggle("on",k===vi));};
   if(instant) return set(); t.classList.add("out"); r.classList.add("out"); setTimeout(set,450);}
 function vAuto(){clearInterval(vtimer); if(!matchMedia("(prefers-reduced-motion: reduce)").matches) vtimer=setInterval(()=>showV(vi+1),9000);}
-$("#vDots").innerHTML=SITE.verses.map(()=>"<i></i>").join("");
 $("#vPrev").onclick=()=>{showV(vi-1); vAuto();}; $("#vNext").onclick=()=>{showV(vi+1); vAuto();};
 
 /* ---------- nav + drawer ---------- */
 const nav=$("#nav"), drawer=$("#drawer"), burger=$("#burger");
-function setDrawer(open){drawer.classList.toggle("open",open); drawer.setAttribute("aria-hidden",String(!open)); burger.setAttribute("aria-expanded",String(open)); if(open) $(".drawer .close").focus(); else burger.focus({preventScroll:true});}
+function setDrawer(open){lockScroll(open); drawer.classList.toggle("open",open); drawer.setAttribute("aria-hidden",String(!open)); burger.setAttribute("aria-expanded",String(open)); if(open) $(".drawer .close").focus(); else burger.focus({preventScroll:true});}
 burger.onclick=()=>setDrawer(true);
 drawer.addEventListener("click",e=>{if(e.target.closest("[data-close]")) setDrawer(false);});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&drawer.classList.contains("open")) setDrawer(false);});
@@ -232,6 +268,29 @@ form.addEventListener("submit",async e=>{
 
 /* ---------- motion: parallax, reveal, nav, wind ---------- */
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* ---------- smooth scrolling (Lenis) ----------
+   Gives the whole page a soft, momentum-style scroll on mouse wheels and trackpads.
+   Touch screens keep their native scrolling. Turned off for "reduce motion" users. */
+let lenis=null;
+function lockScroll(on){ if(lenis) on?lenis.stop():lenis.start(); }
+function initSmooth(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches || typeof Lenis!=="function") return;
+  lenis=new Lenis({ lerp:.085, wheelMultiplier:.95, smoothWheel:true, autoRaf:true, allowNestedScroll:true });
+  window.lenis=lenis;
+  lenis.on("scroll",()=>{ onScroll(); reqP(); });
+  // in-page links glide to their section, just below the sticky header
+  document.addEventListener("click",e=>{
+    const a=e.target.closest('a[href^="#"]'); if(!a) return;
+    const id=a.getAttribute("href"); if(id.length<2) return;
+    const t=document.getElementById(id.slice(1)); if(!t) return;
+    e.preventDefault();
+    if(drawer.classList.contains("open")) setDrawer(false);
+    lenis.start();
+    lenis.scrollTo(id==="#home"?0:t,{ duration:1.25, easing:x=>1-Math.pow(1-x,4) });   // header gap comes from CSS scroll-padding-top
+    history.replaceState(null,"",id);
+  });
+}
+
 function onScroll(){ nav.classList.toggle("solid", scrollY>60); }
 addEventListener("scroll",onScroll,{passive:true});
 
@@ -275,4 +334,15 @@ function wind(){
 }
 
 /* ---------- boot ---------- */
-applyImages(); render(); applyImages(); showV(0,true); vAuto(); onScroll(); initMotion();
+(async function boot(){
+  onScroll(); initSmooth();
+  try{ await loadContent(); }
+  catch(err){ console.error("Could not load content/*.json", err); $("#loadError").hidden=false; initMotion(); return; }
+  SITE.verses=(SITE.home&&SITE.home.verses)||[];
+  $("#vDots").innerHTML=SITE.verses.map(()=>"<i></i>").join("");
+  if(!SITE.verses.length) $("#scripture").hidden=true;
+  render(); showV(0,true); vAuto(); initMotion();
+  if(lenis) lenis.resize();
+  // shared links like …/#bereans: jump once the content is on the page
+  if(location.hash.length>1){ const t=document.getElementById(location.hash.slice(1)); if(t) requestAnimationFrame(()=> lenis ? lenis.scrollTo(t,{immediate:true,force:true}) : t.scrollIntoView()); }
+})();

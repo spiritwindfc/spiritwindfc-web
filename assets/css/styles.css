@@ -35,6 +35,13 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth; scroll-padding-top:84px}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Smooth scrolling (Lenis, assets/js/vendor) — required base styles */
+html.lenis{scroll-behavior:auto}
+html.lenis, html.lenis body{height:auto}
+.lenis:not(.lenis-autoToggle).lenis-stopped{overflow:clip}
+.lenis [data-lenis-prevent]{overscroll-behavior:contain}
+.lenis.lenis-smooth iframe{pointer-events:none}
 em{font-variation-settings:var(--cooper)}
 body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:17px; line-height:1.6; overflow-x:hidden; -webkit-font-smoothing:antialiased}
 body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:60; background:var(--stage)}

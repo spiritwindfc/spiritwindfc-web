@@ -1,0 +1,49 @@
+{
+  "photos": [
+    {
+      "image": "/assets/img/photo-prayer-together.webp",
+      "caption": "Praying together",
+      "size": "tall"
+    },
+    {
+      "image": "/assets/img/photo-worship-singer.webp",
+      "caption": "Worship team",
+      "size": "normal"
+    },
+    {
+      "image": "/assets/img/photo-worship-cross.webp",
+      "caption": "Sunday worship",
+      "size": "wide"
+    },
+    {
+      "image": "/assets/img/photo-worship-band-lead.webp",
+      "caption": "Sunday Celebration",
+      "size": "wide"
+    },
+    {
+      "image": "/assets/img/photo-congregation-prayer.webp",
+      "caption": "Prayer time",
+      "size": "normal"
+    },
+    {
+      "image": "/assets/img/photo-worshiper.webp",
+      "caption": "In His presence",
+      "size": "normal"
+    },
+    {
+      "image": "/assets/img/photo-preaching.webp",
+      "caption": "The Word preached",
+      "size": "normal"
+    },
+    {
+      "image": "/assets/img/photo-worship-leader-stage.webp",
+      "caption": "Leading in praise",
+      "size": "normal"
+    },
+    {
+      "image": "/assets/img/photo-congregation-seated.webp",
+      "caption": "Fellowship",
+      "size": "normal"
+    }
+  ]
+}

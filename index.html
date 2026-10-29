@@ -33,6 +33,7 @@
 </head>
 <body>
 <a class="skip" href="#welcome">Skip to content</a>
+<div class="noscript" id="loadError" hidden>We couldn't load the latest church information. Please refresh the page, or email spiritwindfellowshipchurch@gmail.com.</div>
 <noscript><div class="noscript">Turn on JavaScript to see service times, sermons and events. You can also email spiritwindfellowshipchurch@gmail.com.</div></noscript>
 <header class="nav" id="nav">
   <div class="wrap">
@@ -48,7 +49,7 @@
 
 <div class="drawer" id="drawer" aria-hidden="true">
   <div class="scrim" data-close></div>
-  <div class="panel" role="dialog" aria-modal="true" aria-label="Menu">
+  <div class="panel" role="dialog" aria-modal="true" aria-label="Menu" data-lenis-prevent>
     <button class="close" data-close aria-label="Close menu">×</button>
     <nav id="drawerLinks"></nav>
     <a class="btn btn-primary" href="#visit" data-close>Plan Your Visit</a>
@@ -58,20 +59,20 @@
 <main id="main">
 <!-- HERO -->
 <section class="hero" id="home" aria-label="Welcome">
-  <div class="layer photo" data-speed="0.35" data-bg="hero" style="background-image:url('assets/img/photo-worship-stage-wide.webp')"></div>
+  <div class="layer photo" id="heroPhoto" data-speed="0.35" style="background-image:url('assets/img/photo-worship-stage-wide.webp')"></div>
   <div class="glow a"></div><div class="glow b"></div>
   <canvas id="wind" aria-hidden="true"></canvas>
   <div class="shade"></div>
   <div class="wrap content">
-    <div class="meta rv"><span>Sunday Celebration · <b id="heroTime">9:00 AM</b></span><span>4th Floor, CMS Building</span></div>
-    <h1 class="h1 rv"><span class="line">Loving God.</span><span class="line"><em>Loving People.</em></span></h1>
+    <div class="meta rv"><span><span id="heroSvc">Sunday Celebration</span> · <b id="heroTime">9:00 AM</b></span><span id="heroPlace">4th Floor, CMS Building</span></div>
+    <h1 class="h1 rv"><span class="line" id="heroLine1">Loving God.</span><span class="line"><em id="heroLine2">Loving People.</em></span></h1>
     <p class="sub rv" id="heroSub">One faith. One family. All for Jesus. Come worship with us this Sunday.</p>
     <div class="actions rv">
       <a class="btn btn-primary" href="#visit">Plan Your Visit <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       <a class="btn btn-ghost" href="#welcome">Explore Our Church</a>
     </div>
   </div>
-  <p class="verse" data-speed="-0.12">“The wind bloweth where it listeth… so is every one that is born of the Spirit.”<b>John 3:8 · KJV</b></p>
+  <p class="verse" id="heroVerse" data-speed="-0.12">“The wind bloweth where it listeth… so is every one that is born of the Spirit.”<b>John 3:8 · KJV</b></p>
   <a class="scrollcue" href="#welcome" aria-label="Scroll to the welcome section"></a>
 </section>
 
@@ -79,21 +80,21 @@
 <section class="band welcome" id="welcome">
   <div class="wrap grid">
     <div class="collage">
-      <figure class="c1 rv img"><img data-speed="0.06" src="assets/img/photo-worship-congregation.webp" data-img="welcome1" alt="The congregation worshiping with hands raised at Sunday Celebration"></figure>
-      <figure class="c2 rv img"><img data-speed="-0.08" src="assets/img/photo-fellowship-friends.webp" data-img="welcome2" alt="Two church members smiling together after the service"></figure>
-      <figure class="c3 rv img"><img data-speed="0.12" src="assets/img/photo-fellowship-family.webp" data-img="welcome3" alt="Church family greeting one another, a young family with their little one"></figure>
+      <figure class="c1 rv img"><img data-speed="0.06" src="assets/img/photo-worship-congregation.webp" id="welcomePhoto1" alt="The congregation worshiping with hands raised at Sunday Celebration"></figure>
+      <figure class="c2 rv img"><img data-speed="-0.08" src="assets/img/photo-fellowship-friends.webp" id="welcomePhoto2" alt="Two church members smiling together after the service"></figure>
+      <figure class="c3 rv img"><img data-speed="0.12" src="assets/img/photo-fellowship-family.webp" id="welcomePhoto3" alt="Church family greeting one another, a young family with their little one"></figure>
       <div class="badge"><strong id="followers">3.3K</strong><span>people follow along with SFC on Facebook</span></div>
     </div>
     <div>
       <span class="eyebrow rv">Welcome to SFC</span>
       <h2 class="h2 rv">A church family that <em>loves God</em> and loves people.</h2>
-      <p class="lede rv">Spiritwind Fellowship Church gathers every Sunday for worship, fellowship and the living Word of God. Whether you're exploring faith or looking for a church home, there's a seat for you.</p>
-      <ul class="points rv">
+      <p class="lede rv" id="welcomeText">Spiritwind Fellowship Church gathers every Sunday for worship, fellowship and the living Word of God. Whether you're exploring faith or looking for a church home, there's a seat for you.</p>
+      <ul class="points rv" id="welcomePoints">
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span><b>Worship</b> led by our worship team, every Sunday Celebration.</span></li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span><b>The Word</b> preached plainly, so it guides your week.</span></li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span><b>Fellowship</b> with a family that's all for Jesus.</span></li>
       </ul>
-      <p class="bisaya rv">“Dili jud i-reject ni Lord ang mga magpadayon og duol Kaniya.”<small>From a recent SFC sermon — the Lord will never turn away those who keep drawing near to Him.</small></p>
+      <p class="bisaya rv" id="welcomeQuote">“Dili jud i-reject ni Lord ang mga magpadayon og duol Kaniya.”<small>From a recent SFC sermon — the Lord will never turn away those who keep drawing near to Him.</small></p>
       <div style="margin-top:30px" class="rv"><a class="btn btn-primary" href="#about">About Us</a></div>
     </div>
   </div>
@@ -101,13 +102,13 @@
 
 <!-- WORSHIP -->
 <section class="band stage worship" id="worship" aria-labelledby="worshipH">
-  <div class="bgimg" data-bg="worshipBg" style="background-image:url('assets/img/photo-worship-band.webp')" data-speed="0.25"></div>
+  <div class="bgimg" id="worshipPhoto" style="background-image:url('assets/img/photo-worship-band.webp')" data-speed="0.25"></div>
   <div class="giant" aria-hidden="true" data-speed="-0.15" data-x="1">WORSHIP · WORSHIP ·</div>
   <div class="wrap grid">
     <div>
       <span class="eyebrow rv">SFC Worship Hub</span>
       <h2 class="rv" id="worshipH" style="margin-top:18px">A place to <em style="font-family:var(--f-serif);font-weight:600;color:var(--amber)">worship,</em> connect and grow.</h2>
-      <p class="lede rv" style="margin-top:22px">Sunday Celebration is a day of praise, prayer and the preaching of God's Word, followed by time to meet the family.</p>
+      <p class="lede rv" id="worshipText" style="margin-top:22px">Sunday Celebration is a day of praise, prayer and the preaching of God's Word, followed by time to meet the family.</p>
     </div>
     <div class="svc rv" id="services"></div>
   </div>
@@ -265,11 +266,11 @@
       <div><h4>Sunday</h4><ul id="footSvc"></ul></div>
       <div><h4>Contact</h4><ul id="footContact"></ul></div>
     </div>
-    <div class="fbottom"><span>© <span id="yr"></span> Spiritwind Fellowship Church · #AllForJesus</span><span><a href="privacy.html" style="color:var(--stage-muted)">Privacy policy</a> · <button id="openChecklist">Content checklist</button></span></div>
+    <div class="fbottom"><span>© <span id="yr"></span> Spiritwind Fellowship Church · #AllForJesus</span><span><a href="privacy.html" style="color:var(--stage-muted)">Privacy policy</a></span></div>
   </div>
 </footer>
 
-<dialog id="dlg"><div class="modal" id="dlgBody"></div></dialog>
+<dialog id="dlg"><div class="modal" id="dlgBody" data-lenis-prevent></div></dialog>
 <dialog id="lbx" aria-label="Photo viewer"><div class="lb">
   <button class="x" id="lbClose" aria-label="Close photo viewer">×</button>
   <img id="lbImg" alt="">
@@ -279,7 +280,7 @@
 </div></dialog>
 <div class="toast" id="toast" role="status"></div>
 
-<script src="assets/js/content.js"></script>
+<script src="assets/js/vendor/lenis.min.js"></script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>
