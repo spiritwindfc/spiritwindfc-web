@@ -1,6 +1,15 @@
 {
   "events": [
     {
+      "title": "God's Engagement",
+      "date": "2026-12-12",
+      "time": "7:00AM - 9:00PM",
+      "location": "SFC Worship Hub, 4th Floor CMS Building",
+      "text": "One faith. One family. All for Jesus. Join the SFC family for worship, fellowship and the living Word of God.",
+      "image": "/assets/img/pasted-image-1793252092472.webp",
+      "url": ""
+    },
+    {
       "title": "Sunday Celebration",
       "date": "2026-11-01",
       "time": "9:00 AM",
