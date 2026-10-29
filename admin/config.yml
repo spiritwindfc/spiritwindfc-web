@@ -1,13 +1,12 @@
 # Spiritwind Fellowship Church — website admin (Sveltia CMS)
 # Docs: https://sveltiacms.app/en/docs
 #
-# ▸ After setting up the login helper, uncomment base_url below (marked "CHANGE ME").
 
 backend:
   name: github
   repo: spiritwindfc/spiritwindfc-web
   branch: main
-  # base_url: https://sveltia-cms-auth.YOUR-SUBDOMAIN.workers.dev   # CHANGE ME: uncomment after setting up the login helper
+  base_url: https://sfc-cms-auth.emmanuelotacan95.workers.dev   # "Sign in with GitHub" helper (Cloudflare Worker)
   commit_messages:
     update: "Update {{collection}}: {{path}} (via website admin)"
     uploadMedia: "Upload {{path}} (via website admin)"
